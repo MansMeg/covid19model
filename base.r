@@ -21,7 +21,8 @@ countries <- c(
   "Switzerland",
   "Greece",
   "Portugal",
-  "Netherlands"
+  "Netherlands",
+  "Finland"
 )
 
 # Commandline options and parsing
