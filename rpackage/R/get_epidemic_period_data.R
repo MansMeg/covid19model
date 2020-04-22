@@ -46,17 +46,17 @@ compute_index <- function(x,
                           number_of_deaths, 
                           days_before_to_include_in_period){
   checkmate::assert_data_frame(x)
-  checkmate::assert_names(colnames(x), must.include = c("country", "Cases", "Deaths"))
-  checkmate::assert_false(any(is.na(x$Cases)))
-  checkmate::assert_false(any(is.na(x$Deaths)))
+  checkmate::assert_names(colnames(x), must.include = c("country", "cases", "deaths"))
+  checkmate::assert_false(any(is.na(x$cases)))
+  checkmate::assert_false(any(is.na(x$deaths)))
   checkmate::assert_integerish(number_of_deaths, lower = 0)
   checkmate::assert_integerish(days_before_to_include_in_period, lower = 0)
   
   x <- dplyr::group_by(x, country)
-  x <- dplyr::mutate(x, cumsum_deaths = cumsum(Deaths))
+  x <- dplyr::mutate(x, cumsum_deaths = cumsum(deaths))
   x_country_list <- split(x, x$country)
   index1 <- unlist(lapply(x_country_list, 
-                          function(x) which(cumsum(x$Deaths) >= number_of_deaths)[1]))
+                          function(x) which(cumsum(x$deaths) >= number_of_deaths)[1]))
   index2 <- index1 - days_before_to_include_in_period
   return(list(index1 = index1, index2 = index2))
 }

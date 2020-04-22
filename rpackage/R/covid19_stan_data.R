@@ -38,13 +38,14 @@ covid19_stan_data <- function(formula,
   checkmate::assert_date(daily_data$date)
   for(country in countries){
     # Assert all intermediate days exist in daily data
-    min_date <- min(daily_data$date[country])
-    max_date <- max(daily_data$date[country])
+    min_date <- min(daily_data$date[daily_data$country == country])
+    max_date <- max(daily_data$date[daily_data$country == country])
     full_date_sequence <- seq.Date(min_date, max_date, by = 1)
-    checkmate::assert_set_equal(daily_data$date[country], full_date_sequence)
+    checkmate::assert_set_equal(daily_data$date[daily_data$country == country], 
+                                full_date_sequence, 
+                                .var.name = paste0("daily_data$date[daily_data$country == '",country,"']"))
   }
   checkmate::assert_false(any(duplicated(daily_data)))
-  
   checkmate::assert_data_frame(country_data)
   checkmate::assert_names(colnames(country_data), must.include = c("country", "total_population", "ifr"))
   checkmate::assert_names(colnames(country_data), must.include = c("country", "total_population", "ifr"))
