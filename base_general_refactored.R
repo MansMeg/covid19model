@@ -54,7 +54,7 @@ if(DEBUG && FULL) {
 }
 
 if(length(cmdoptions$args) == 0) {
-  StanModel = 'base'
+  StanModel = 'base_general_speed'
 } else {
   StanModel = cmdoptions$args[1]
 }
@@ -122,14 +122,13 @@ x2 = rgammaAlt(1e7,mean2,cv2) # onset-to-death distribution
 ecdf.saved = ecdf(x1+x2)
 
 # Note that the Stan model already includes an intercept
-new_stan_data <- covid19_stan_data(formula = ~ -1 + schools...universities + self.isolating.if.ill + public.events + any.intervention + lockdown + social.distancing.encouraged,
-                                   daily_data = covariates_df,
-                                   country_data = ifr.by.country,
-                                   serial_interval = serial.interval$fit,
-                                   ecdf_time = ecdf.saved, 
-                                   N0 = 6, 
-                                   N2 = N2)
-# DEBUG: save(new_stan_data, file = "new_stan_data.rda")
+stan_data <- covid19_stan_data(formula = ~ -1 + schools...universities + self.isolating.if.ill + public.events + any.intervention + lockdown + social.distancing.encouraged,
+                               daily_data = covariates_df,
+                               country_data = ifr.by.country,
+                               serial_interval = serial.interval$fit,
+                               ecdf_time = ecdf.saved, 
+                               N0 = 6, 
+                               N2 = N2)
 
 options(mc.cores = parallel::detectCores() - 1L)
 rstan_options(auto_write = TRUE)
