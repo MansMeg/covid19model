@@ -35,9 +35,9 @@ covid19_stan_data <- function(formula,
   checkmate::assert_data_frame(daily_data)
   checkmate::assert_names(colnames(daily_data), must.include = attr(terms(formula), "term.labels"))
   checkmate::assert_names(colnames(daily_data), must.include = c("date", "country", "cases", "deaths"))
-  checkmate::assert_factor(daily_data$country)
+  checkmate::assert_factor(daily_data$country, any.missing = FALSE)
   countries <- levels(daily_data$country)
-  checkmate::assert_date(daily_data$date)
+  checkmate::assert_date(daily_data$date, any.missing = FALSE)
   for(country in countries){
     # Assert all intermediate days exist in daily data
     min_date <- min(daily_data$date[daily_data$country == country])
