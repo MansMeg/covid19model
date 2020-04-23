@@ -10,6 +10,6 @@
 # If you use srun for each command, the mem/cpu usage of each step
 # can be seen individually with "slurm history"
 module load r/3.6.1-python3
-export PBS_JOBID="base"
+export PBS_JOBID="om2_ecdc"
 Rscript base_general_refactored_oxford2_ecdc.R base_general_speed --full
 
