@@ -9,14 +9,17 @@
 #' @param days_before_to_include_in_period The number of days before the cumulative deaths to use as starting date
 #' 
 #' @export
-get_epidemic_period_data <- function(x, 
-                                number_of_deaths, 
-                                days_before_to_include_in_period){
+get_epidemic_period_data <- 
+  function(x, 
+           number_of_deaths, 
+           days_before_to_include_in_period){
 
   idxs <- compute_index(x, 
                         number_of_deaths, 
                         days_before_to_include_in_period)
-
+  
+  countries <- levels(x$country)
+  x$country <- as.character(x$country)
   x <- dplyr::group_by(x, country)
   x <- dplyr::mutate(x, row_number = row_number())
   x <- dplyr::left_join(x, data.frame(country = names(idxs$index2),
@@ -26,7 +29,7 @@ get_epidemic_period_data <- function(x,
   x <- dplyr::filter(x, start <= row_number)
   x$start <- NULL
   x$row_number <- NULL
-  
+  x$country <- factor(x$country, levels = countries)
   x
 }
 

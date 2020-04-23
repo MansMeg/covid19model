@@ -29,12 +29,14 @@ covid19_stan_data <- function(formula,
                               serial_interval, 
                               ecdf_time, 
                               N0 = 6, 
-                              N2 = 90){
+                              N2 = 90, 
+                              verbose = TRUE){
   checkmate::assert_formula(formula)
   checkmate::assert_data_frame(daily_data)
   checkmate::assert_names(colnames(daily_data), must.include = attr(terms(formula), "term.labels"))
   checkmate::assert_names(colnames(daily_data), must.include = c("date", "country", "cases", "deaths"))
-  countries <- unique(daily_data$country)
+  checkmate::assert_factor(daily_data$country)
+  countries <- levels(daily_data$country)
   checkmate::assert_date(daily_data$date)
   for(country in countries){
     # Assert all intermediate days exist in daily data
@@ -76,7 +78,7 @@ covid19_stan_data <- function(formula,
               probability_of_death_given_infection,
               ecdf_time = ecdf_time,
               N2 = N2)
-  f <- do.call(cbind, fs)
+  f <- do.call(cbind, f)
   
   # Create stan data object
   sd <- list()
@@ -87,9 +89,10 @@ covid19_stan_data <- function(formula,
   sd$P <- ncol(Xs[[1]])
   sd$EpidemicStart <- EpidemicStart
   sd$SI <- serial_interval
-  sd$deaths <- as_country_matrix(d1$Deaths, d1$country, N2, fill_value = -1)
-  sd$cases <- as_country_matrix(d1$Cases, d1$country, N2, fill_value = -1)
+  sd$deaths <- as_country_matrix(d1$deaths, d1$country, N2, fill_value = -1)
+  sd$cases <- as_country_matrix(d1$cases, d1$country, N2, fill_value = -1)
   sd$pop <- country_data[countries, "total_population"]
+  names(sd$pop) <- country_data[countries, "country"]
   sd$f <- f
   
   sd
@@ -107,13 +110,14 @@ covid_stan_covariate_data <- function(formula, daily_data){
   countries <- unique(daily_data$country)
   dat <- list()
   for(i in seq_along(countries)){
-    tmp <- daily_data[data$country == countries[i],]
+    tmp <- daily_data[daily_data$country == countries[i],]
     dat[[countries[i]]] <- model.matrix(formula, tmp)
   }
   dat
 }
 
 as_country_matrix <- function(x, country, N2, fill_value = -1){
+  checkmate::assert_factor(country)
   xlst <- split(x, country)
   xlst <- lapply(xlst, function(x, N2, fill_value) {
     mat <- matrix(fill_value, nrow = N2, ncol = 1)
@@ -122,7 +126,7 @@ as_country_matrix <- function(x, country, N2, fill_value = -1){
   }, N2 = N2, fill_value = fill_value)
   mat <- do.call(cbind, xlst)
   colnames(mat) <- names(xlst)
-  mat
+  mat[,levels(country)]
 }
 
 
