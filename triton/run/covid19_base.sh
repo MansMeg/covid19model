@@ -9,5 +9,6 @@
 # output goes into hello.out
 # If you use srun for each command, the mem/cpu usage of each step
 # can be seen individually with "slurm history"
+module load R
 export PBS_JOBID="base"
 Rscript base_general_refactored.R base_general_speed --full
