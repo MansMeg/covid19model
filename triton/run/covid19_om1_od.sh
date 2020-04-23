@@ -11,5 +11,5 @@
 # can be seen individually with "slurm history"
 module load r/3.6.1-python3
 export PBS_JOBID="base"
-Rscript base_general_refactored_base.R base_general_speed --full
+Rscript base_general_refactored_oxford1_od.R base_general_speed --full
 
