@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --time=0-23:00:00    # 5 mins
-#SBATCH --cpus-per-task=12
+#SBATCH --cpus-per-task=4
 
 # Defaults to directory of when submitted.  Explicit cd if needed (slurm defaults
 # to submission directory).
@@ -9,6 +9,6 @@
 # output goes into hello.out
 # If you use srun for each command, the mem/cpu usage of each step
 # can be seen individually with "slurm history"
-module load R
+module load r/3.6.1-python3
 export PBS_JOBID="base"
 Rscript base_general_refactored.R base_general_speed --full
