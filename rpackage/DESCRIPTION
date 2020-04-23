@@ -1,7 +1,7 @@
 Package: covid19imperial
 Type: Package
 Title: Helper functions for the covid19imperial model
-Version: 1.0
+Version: 0.1
 Date: 2020-04-21
 Author: Who wrote it
 Maintainer: Who to complain to <yourfault@somewhere.net>
@@ -9,3 +9,5 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 RoxygenNote: 7.0.1
 Encoding: UTF-8
+Suggests: 
+    testthat (>= 2.1.0)
