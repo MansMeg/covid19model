@@ -130,7 +130,7 @@ stan_data <- covid19_stan_data(formula = ~ -1 + schools...universities + self.is
                                N0 = 6, 
                                N2 = N2)
 
-options(mc.cores = parallel::detectCores() - 1L)
+options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 m = stan_model(paste0('stan-models/',StanModel,'.stan'))
 
@@ -171,7 +171,7 @@ g = (mcmc_intervals(Rt_adj,prob = .9))
 ggsave(sprintf("results/%s-final-rt.png",filename),g,width=4,height=6)
 system(paste0("Rscript plot-3-panel.r ", filename,'-stanfit.Rdata'))
 system(paste0("Rscript plot-forecast.r ",filename,'-stanfit.Rdata'))
-system(paste0("Rscript make-table.r results/",filename,'-stanfit.Rdata'))
+#system(paste0("Rscript make-table.r results/",filename,'-stanfit.Rdata'))
 verify_result <- system(paste0("Rscript web-verify-output.r ", filename,'.Rdata'),intern=FALSE)
 if(verify_result != 0){
   stop("Verification of web output failed!")
