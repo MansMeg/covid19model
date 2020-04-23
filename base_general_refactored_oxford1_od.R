@@ -95,13 +95,15 @@ date_max <- max(d$date)
 
 
 od$CountryName[od$CountryName == "United Kingdom"] <- "United_Kingdom"
+od <- dplyr::group_by(od, CountryCode)
+od <- tidyr::fill(od, StringencyIndex)
 covariates_df <- dplyr::left_join(od, 
                                   d[, c("date", "Cases", "Deaths", "Countries.and.territories")], 
                                   by = c("CountryName" = "Countries.and.territories", "Date" = "date"))
 covariates_df$S6plus <- as.character(covariates_df$S6)
 covariates_df$S6plus[covariates_df$S6 == "Restrict movement"] <- 
   paste0(covariates_df$S6[covariates_df$S6 == "Restrict movement"], covariates_df$S6.IsGeneral[covariates_df$S6 == "Restrict movement"])
-colnames(covariates_df)[c(1, 3, 27, 28)] <- c("country", "date", "cases", "deaths")
+colnames(covariates_df)[c(1, 3, 23, 24)] <- c("country", "date", "cases", "deaths")
 covariates_df$country <- factor(covariates_df$country, levels = countries)
 # table(covariates_df$country, is.na(covariates_df$ConfirmedCases))
 covariates_df <- covariates_df[covariates_df$date <= date_max,]
