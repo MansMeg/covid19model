@@ -54,7 +54,7 @@ covid19_stan_data <- function(formula,
   checkmate::assert_false(any(duplicated(country_data)))
   checkmate::assert_set_equal(country_data$country, countries)
   
-  checkmate::assert_numeric(serial_interval)
+  checkmate::assert_numeric(serial_interval, min.len = N2)
   checkmate::assert_true(sum(serial_interval) <= 1)
   
   checkmate::assert_class(ecdf_time, c("ecdf", "stepfun", "function"))
@@ -84,35 +84,50 @@ covid19_stan_data <- function(formula,
   sd <- list()
   sd$M <- length(countries)
   sd$N <- unlist(lapply(Xs, nrow))
-  sd$N0 <- N0
-  sd$N2 <- N2
-  sd$P <- ncol(Xs[[1]])
-  sd$EpidemicStart <- EpidemicStart
-  sd$SI <- serial_interval
   sd$deaths <- as_country_matrix(d1$deaths, d1$country, N2, fill_value = -1)
+  sd$f <- f
+  sd$N0 <- N0
   sd$cases <- as_country_matrix(d1$cases, d1$country, N2, fill_value = -1)
+  sd$SI <- serial_interval[1:N2]
+  sd$EpidemicStart <- EpidemicStart  
   sd$pop <- country_data[countries, "total_population"]
   names(sd$pop) <- country_data[countries, "country"]
-  sd$f <- f
+  sd$N2 <- N2
+  sd$x <- 1:N2
+  sd$P <- ncol(Xs[[1]])
+  sd$X <- Xs
+  
+  if(length(sd$N) == 1) {
+    sd$N = as.array(sd$N)
+  }
   
   sd
 }
 
+
 #' Extract design matrices compatible with current stan model
 #' @inheritParams covid19_stan_data
 #' @export
-covid_stan_covariate_data <- function(formula, daily_data){
+covid_stan_covariate_data <- function(formula, daily_data, N2 = NULL){
   checkmate::assert_formula(formula)
   checkmate::assert_data_frame(daily_data)
   checkmate::assert_names(colnames(daily_data), must.include = attr(terms(formula), "term.labels"))
   checkmate::assert_names(colnames(daily_data), must.include = c("date", "country"))
+  checkmate::assert_factor(daily_data$country)
+  checkmate::assert_int(N2, null.ok = TRUE, lower = 1)
 
-  countries <- unique(daily_data$country)
+  countries <- levels(daily_data$country)
   dat <- list()
   for(i in seq_along(countries)){
     tmp <- daily_data[daily_data$country == countries[i],]
+    if(!is.null(N2)){
+      N <- nrow(tmp)
+      tmp[N:N2,] <- tmp[N,] 
+    }
     dat[[countries[i]]] <- model.matrix(formula, tmp)
   }
+  dat <- sapply(dat, identity, simplify="array")
+  dat <- aperm(dat, c(3,1,2))
   dat
 }
 
