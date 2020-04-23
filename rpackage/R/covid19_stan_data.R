@@ -72,7 +72,9 @@ covid19_stan_data <- function(formula,
                                      number_of_deaths = 10,
                                      days_before_to_include_in_period = 30) 
   
-  Xs <- covid_stan_covariate_data(formula, d1)
+  Xs <- covid_stan_covariate_data(formula, daily_data = d1, N2 = N2)
+  
+  Ns <- dplyr::summarise(dplyr::group_by(d1, country), N = n())
   
   f <- lapply(country_data[countries, "ifr"], 
               probability_of_death_given_infection,
@@ -83,7 +85,8 @@ covid19_stan_data <- function(formula,
   # Create stan data object
   sd <- list()
   sd$M <- length(countries)
-  sd$N <- unlist(lapply(Xs, nrow))
+  sd$N <- Ns$N
+  names(sd$N) <- Ns$country
   sd$deaths <- as_country_matrix(d1$deaths, d1$country, N2, fill_value = -1)
   sd$f <- f
   sd$N0 <- N0
@@ -94,7 +97,7 @@ covid19_stan_data <- function(formula,
   names(sd$pop) <- country_data[countries, "country"]
   sd$N2 <- N2
   sd$x <- 1:N2
-  sd$P <- ncol(Xs[[1]])
+  sd$P <- dim(Xs)[3]
   sd$X <- Xs
   
   if(length(sd$N) == 1) {
@@ -126,7 +129,10 @@ covid_stan_covariate_data <- function(formula, daily_data, N2 = NULL){
     }
     dat[[countries[i]]] <- model.matrix(formula, tmp)
   }
-  dat <- sapply(dat, identity, simplify="array")
+  # [1] 15 90  6
+  dat <- array(unlist(dat), 
+               dim = c(nrow(dat[[1]]), ncol(dat[[1]]), length(dat)),
+               dimnames = list(rownames(dat[[1]]), colnames(dat[[1]]), names(dat)))
   dat <- aperm(dat, c(3,1,2))
   dat
 }
