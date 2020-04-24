@@ -145,19 +145,12 @@ if(DEBUG) {
   fit = sampling(m,data=stan_data,iter=200,warmup=100,chains=4,thin=4,control = list(adapt_delta = 0.95, max_treedepth = 10))
 }  
 
-out = rstan::extract(fit)
-prediction = out$prediction
-estimated.deaths = out$E_deaths
-estimated.deaths.cf = out$E_deaths0
-
 JOBID = Sys.getenv("PBS_JOBID")
 if(JOBID == "")
   JOBID = as.character(abs(round(rnorm(1) * 1000000)))
 print(sprintf("Jobid = %s",JOBID))
 
-save.image(paste0('results/',StanModel,'-',JOBID,'.Rdata'))
-
-save(fit, daily_data, country_data, file=paste0('results/',StanModel,'-',JOBID,'-stanfit.Rdata'))
+save(fit, stan_data, daily_data, country_data, file=paste0('results/',StanModel,'-',JOBID,'-stanfit.Rdata'))
 
 if(FALSE){
   library(bayesplot)
