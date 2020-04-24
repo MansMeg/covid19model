@@ -8,7 +8,7 @@ full_names <- names(od)
 
 # Clean variable names
 ig <- stringr::str_detect(names(od), pattern = "IsGeneral")
-names(od)[ig] <- stringr::str_replace(names(od)[ig], pattern = "_", ".") 
+names(od)[ig] <- stringr::str_replace(names(od)[ig], pattern = "_", ".")
 names(od) <- unlist(lapply(strsplit(names(od), split =  "_"), function(x) x[1]))
 
 
@@ -25,7 +25,7 @@ od <- dplyr::group_by(od, CountryCode)
 od <- tidyr::fill(od, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13)
 od <- tidyr::fill(od, S1.IsGeneral, S2.IsGeneral, S3.IsGeneral, S4.IsGeneral, S5.IsGeneral, S6.IsGeneral)
 
-usethis::use_data(od)
+usethis::use_data(od, version = 2, overwrite = TRUE)
 
 
 
