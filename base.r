@@ -98,10 +98,19 @@ covariates$self_isolating_if_ill[covariates$self_isolating_if_ill > covariates$l
 
 forecast = 0
 
-N2 = 90 # increase if you need more forecast
+N2 = 120 # increase if you need more forecast
 
 dates = list()
 reported_cases = list()
+# Pads serial interval with 0 if N2 is greater than the length of the serial
+# interval array
+if (N2 > length(serial.interval$fit)) {
+  pad_serial.interval <- data.frame(
+    "X"=(length(serial.interval$fit)+1):N2,
+    "fit"=rep(0.0, max(N2-length(serial.interval$fit), 0 ))
+  )
+  serial.interval = rbind(serial.interval, pad_serial.interval)
+}
 stan_data = list(M=length(countries),N=NULL,covariate1=NULL,covariate2=NULL,covariate3=NULL,covariate4=NULL,covariate5=NULL,covariate6=NULL,deaths=NULL,f=NULL,
                  N0=6,cases=NULL,SI=serial.interval$fit[1:N2],
                  EpidemicStart = NULL, pop = NULL) # N0 = 6 to make it consistent with Rayleigh
@@ -255,7 +264,13 @@ save(fit,prediction,dates,reported_cases,deaths_by_country,countries,estimated.d
 
 library(bayesplot)
 filename <- paste0(StanModel,'-',JOBID)
-system(paste0("Rscript covariate-size-effects.r ", filename,'-stanfit.Rdata'))
+
+print("Generating covariate size effects plot")
+covariate_size_effects_error <- system(paste0("Rscript covariate-size-effects.r ", filename,'-stanfit.Rdata'),intern=FALSE)
+if(covariate_size_effects_error != 0){
+  stop(sprintf("Error while plotting covariate size effects! Code: %d", covariate_size_effects_error))
+}
+
 mu = (as.matrix(out$mu))
 colnames(mu) = countries
 g = (mcmc_intervals(mu,prob = .9))
@@ -265,10 +280,26 @@ Rt_adj = do.call(cbind,tmp)
 colnames(Rt_adj) = countries
 g = (mcmc_intervals(Rt_adj,prob = .9))
 ggsave(sprintf("results/%s-final-rt.png",filename),g,width=4,height=6)
-system(paste0("Rscript plot-3-panel.r ", filename,'-stanfit.Rdata'))
-system(paste0("Rscript plot-forecast.r ",filename,'-stanfit.Rdata'))
-system(paste0("Rscript make-table.r results/",filename,'-stanfit.Rdata'))
-verify_result <- system(paste0("Rscript web-verify-output.r ", filename,'.Rdata'),intern=FALSE)
-if(verify_result != 0){
-  stop("Verification of web output failed!")
+
+print("Generate 3-panel plots")
+plot_3_panel_error <- system(paste0("Rscript plot-3-panel.r ", filename,'-stanfit.Rdata'),intern=FALSE)
+if(plot_3_panel_error != 0){
+  stop(sprintf("Generation of 3-panel plots failed! Code: %d", plot_3_panel_error))
+}
+
+print("Generate forecast plot")
+plot_forecast_error <- system(paste0("Rscript plot-forecast.r ",filename,'-stanfit.Rdata'),intern=FALSE)
+if(plot_forecast_error != 0) {
+  stop(sprintf("Generation of forecast plot failed! Code: %d", plot_forecast_error))
+}
+
+print("Make forecast table")
+make_table_error <- system(paste0("Rscript make-table.r results/",filename,'-stanfit.Rdata'),intern=FALSE)
+if(make_table_error != 0){
+  stop(sprintf("Generation of alpha covar table failed! Code: %d", make_table_error))
+}
+
+verify_result_error <- system(paste0("Rscript web-verify-output.r ", filename,'.Rdata'),intern=FALSE)
+if(verify_result_error != 0){
+  stop(sprintf("Verification of web output failed! Code: %d", verify_result_error))
 }
