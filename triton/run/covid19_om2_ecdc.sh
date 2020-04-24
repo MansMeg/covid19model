@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=0-23:00:00    # 5 mins
+#SBATCH --time=0-04:30:00
 #SBATCH --cpus-per-task=4
 
 # Defaults to directory of when submitted.  Explicit cd if needed (slurm defaults
