@@ -32,22 +32,11 @@ covid19_stan_data <- function(formula,
                               N2 = 90, 
                               verbose = TRUE){
   checkmate::assert_formula(formula)
-  checkmate::assert_data_frame(daily_data)
+  assert_daily_data(daily_data)
   checkmate::assert_names(colnames(daily_data), must.include = attr(terms(formula), "term.labels"))
-  checkmate::assert_names(colnames(daily_data), must.include = c("date", "country", "cases", "deaths"))
-  checkmate::assert_factor(daily_data$country, any.missing = FALSE)
+  
   countries <- levels(daily_data$country)
-  checkmate::assert_date(daily_data$date, any.missing = FALSE)
-  for(country in countries){
-    # Assert all intermediate days exist in daily data
-    min_date <- min(daily_data$date[daily_data$country == country])
-    max_date <- max(daily_data$date[daily_data$country == country])
-    full_date_sequence <- seq.Date(min_date, max_date, by = 1)
-    checkmate::assert_set_equal(daily_data$date[daily_data$country == country], 
-                                full_date_sequence, 
-                                .var.name = paste0("daily_data$date[daily_data$country == '",country,"']"))
-  }
-  checkmate::assert_false(any(duplicated(daily_data)))
+  
   checkmate::assert_data_frame(country_data)
   checkmate::assert_names(colnames(country_data), must.include = c("country", "total_population", "ifr"))
   checkmate::assert_names(colnames(country_data), must.include = c("country", "total_population", "ifr"))
@@ -113,10 +102,8 @@ covid19_stan_data <- function(formula,
 #' @export
 covid_stan_covariate_data <- function(formula, daily_data, N2 = NULL){
   checkmate::assert_formula(formula)
-  checkmate::assert_data_frame(daily_data)
+  assert_daily_data(daily_data)
   checkmate::assert_names(colnames(daily_data), must.include = attr(terms(formula), "term.labels"))
-  checkmate::assert_names(colnames(daily_data), must.include = c("date", "country"))
-  checkmate::assert_factor(daily_data$country)
   checkmate::assert_int(N2, null.ok = TRUE, lower = 1)
 
   countries <- levels(daily_data$country)
@@ -169,3 +156,71 @@ probability_of_death_given_infection <- function(ifr, ecdf_time, N2){
   }
   f
 }
+
+
+assert_stan_data <- function(x){
+  checkmate::assert_list(x)
+  checkmate::assert_names(names(x), 
+                          identical.to = c("M", "N", "deaths", "f", "N0", "cases", "SI", "EpidemicStart", "pop", "N2", "x", "P", "X"))
+  
+}
+
+assert_daily_data <- function(x){
+  checkmate::assert_data_frame(x)
+  checkmate::assert_names(colnames(x), must.include = c("date", "country", "cases", "deaths"))
+  checkmate::assert_factor(x$country)
+  checkmate::assert_factor(x$country, any.missing = FALSE)
+  countries <- levels(x$country)
+  checkmate::assert_date(x$date, any.missing = FALSE)
+  for(country in countries){
+    # Assert all intermediate days exist in daily data
+    min_date <- min(x$date[x$country == country])
+    max_date <- max(x$date[x$country == country])
+    full_date_sequence <- seq.Date(min_date, max_date, by = 1)
+    checkmate::assert_set_equal(x$date[x$country == country], 
+                                full_date_sequence, 
+                                .var.name = paste0("daily_data$date[daily_data$country == '",country,"']"))
+  }
+  checkmate::assert_false(any(duplicated(x)))
+}
+
+#' Access dates for the epidemic period by country
+#' 
+#' @inheritParams covid19_stan_data
+#' 
+#' @export
+get_dates <- function(daily_data){
+  assert_daily_data(daily_data)
+  d1 <- get_epidemic_period_data(daily_data,
+                                 number_of_deaths = 10,
+                                 days_before_to_include_in_period = 30) 
+  split(d1$date, d1$country)
+}
+
+#' @rdname stan_data
+#' @export
+get_reported_cases <- function(daily_data){
+  assert_daily_data(daily_data)
+  d1 <- get_epidemic_period_data(daily_data,
+                                 number_of_deaths = 10,
+                                 days_before_to_include_in_period = 30) 
+  split(d1$cases, d1$country)
+}
+
+#' @rdname stan_data
+#' @export
+get_deaths <- function(daily_data){
+  assert_daily_data(daily_data)
+  d1 <- get_epidemic_period_data(daily_data,
+                                 number_of_deaths = 10,
+                                 days_before_to_include_in_period = 30) 
+  split(d1$deaths, d1$country)
+}
+
+#' @rdname stan_data
+#' @export
+get_countries <- function(stan_data){
+  assert_stan_data(stan_data)
+  dimnames(stan_data$X)[[3]]
+}
+

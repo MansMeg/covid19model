@@ -50,7 +50,7 @@ geom_stepribbon <- function(
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomStepribbon <- ggproto::ggproto(
+GeomStepribbon <- ggplot2::ggproto(
   "GeomStepribbon", GeomRibbon, 
   
   extra_params = c("na.rm", "kmplot"),
