@@ -2,7 +2,9 @@
 title: "Report COVID19 Imperial Model"
 author: "Måns Magnusson"
 date: '2020-04-26'
-output: pdf_document
+output: 
+  pdf_document: 
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -22,14 +24,16 @@ m[[5]] <- mget(load("../results/base_general_speed-om2_od-stanfit.Rdata"))
 
 ## Model descriptions
 
-- Model 1: The basline model, previously included
+- Model 1: The baseline model, previously included, without partial pooling
+- Model 2: The model using S1 - S7 oxford variables and ECDC data
+- Model 2: The model using S1 - S7 oxford variables and ECDC data
 
 
 ## Covariate effects
 
 ```{r, include=TRUE, fig.width=7, fig.height=3}
 plot_models <- c(1,2,4)
-for(i in plot_models){
+for(i in seq_along(plot_models)){
   mod <- m[[plot_models[i]]]
   p <- plot_covariate_size_effects(mod$fit, mod$stan_data) + ggtitle(paste0("Model", plot_models[i]))
   print(p)
@@ -42,8 +46,8 @@ for(i in plot_models){
 ## R0 for different countries
 
 ```{r, include=TRUE, fig.width=7, fig.height=3}
-plot_models <- length(m)
-for(i in plot_models){
+plot_models <- 1:length(m)
+for(i in seq_along(plot_models)){
   mod <- m[[plot_models[i]]]
   p <- plot_mu(mod$fit, mod$stan_data) + ggtitle(paste0("Model", plot_models[i]))
   print(p)
@@ -54,10 +58,10 @@ for(i in plot_models){
 ## Infectious in all countries?
 
 ```{r, include=TRUE, fig.width=12, fig.height=4}
-plot_models <- length(m)
+plot_models <- 1:length(m)
 countries <- get_countries(m[[1]]$stan_data)
 for(country in countries){
-  for(i in plot_models){
+  for(i in seq_along(plot_models)){
     mod <- m[[plot_models[i]]]
     p <- plot_three_panel(country = country, stan_fit = mod$fit, stan_data = mod$stan_data, daily_data = mod$daily_data, title = paste0(country, ": Model", plot_models[i]))
     print(p)
