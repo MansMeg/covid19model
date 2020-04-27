@@ -124,7 +124,7 @@ ecdf.saved = ecdf(x1+x2)
 # Note that the Stan model already includes an intercept
 daily_data = covariates_df
 country_data = ifr.by.country
-stan_data <- covid19_stan_data(formula = ~ -1 + schools...universities + self.isolating.if.ill + public.events + any.intervention + lockdown + social.distancing.encouraged,
+stan_data <- covid19_stan_data(formula = ~ schools...universities + self.isolating.if.ill + public.events + any.intervention + lockdown + social.distancing.encouraged,
                                daily_data = covariates_df,
                                country_data = ifr.by.country,
                                serial_interval = serial.interval$fit,

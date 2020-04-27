@@ -73,41 +73,28 @@ dir.create("web/", showWarnings = FALSE, recursive = TRUE)
 
 
 ## Reading all data
-d <- readRDS('data/COVID-19-up-to-date.rds')
-d$date <- dmy(d$DateRep)
-
-# read data
-## get IFR and population from same file
-ifr.by.country = read.csv("data/popt_ifr.csv")
-ifr.by.country$country = as.character(ifr.by.country[,2])
-ifr.by.country$country[ifr.by.country$country == "United Kingdom"] = "United_Kingdom"
-names(ifr.by.country)[2:4] <- c("country", "total_population", "ifr")
-
-serial.interval = read.csv("data/serial_interval.csv")
-
-# Read in covariate data
+data(ecdc)
+data(country_data)
 data(od)
+serial.interval <- read.csv("data/serial_interval.csv")
 
 # Parameters
 N2 = 90 # increase if you need more forecast
 date_min <- dmy('31/12/2019') 
-date_max <- max(d$date)
+date_max <- max(ecdc$date)
 
+# Create additional variable
+od$S6plus <- as.character(od$S6)
+od$S6plus[od$S6 == "Restrict movement"] <- 
+  paste0(od$S6[od$S6 == "Restrict movement"], od$S6.IsGeneral[od$S6 == "Restrict movement"])
+levels(od$S1) <- list("No measures"=c("No measures", "Recommend closing"), "Require closing"=c("Require closing"))
 
-od$CountryName[od$CountryName == "United Kingdom"] <- "United_Kingdom"
-covariates_df <- dplyr::left_join(od, 
-                                  d[, c("date", "Cases", "Deaths", "Countries.and.territories")], 
-                                  by = c("CountryName" = "Countries.and.territories", "Date" = "date"))
-covariates_df$S6plus <- as.character(covariates_df$S6)
-covariates_df$S6plus[covariates_df$S6 == "Restrict movement"] <- 
-  paste0(covariates_df$S6[covariates_df$S6 == "Restrict movement"], covariates_df$S6.IsGeneral[covariates_df$S6 == "Restrict movement"])
-colnames(covariates_df)[c(1, 3, 27, 28)] <- c("country", "date", "cases", "deaths")
-covariates_df$country <- factor(covariates_df$country, levels = countries)
-# table(covariates_df$country, is.na(covariates_df$ConfirmedCases))
-covariates_df <- covariates_df[covariates_df$date <= date_max,]
+# Extract dates in analysis
+od <- od[od$date <= date_max,]
 
-covariates_df$cases[is.na(covariates_df$cases)] <- 0
-covariates_df$deaths[is.na(covariates_df$deaths)] <- 0
+# Replace missing values with 0
+od$cases[is.na(od$cases)] <- 0
+od$deaths[is.na(od$deaths)] <- 0
 
 
 set.seed(4711)
@@ -119,12 +106,11 @@ x2 = rgammaAlt(1e7,mean2,cv2) # onset-to-death distribution
 
 ecdf.saved = ecdf(x1+x2)
 
-daily_data = covariates_df
-country_data = ifr.by.country
+daily_data = od
 # Note that the Stan model already includes an intercept
-stan_data <- covid19_stan_data(formula = ~ -1 + S1 + S2 + S3 + S4 + S5 + S6plus,
-                               daily_data = covariates_df,
-                               country_data = ifr.by.country,
+stan_data <- covid19_stan_data(formula = ~ S1 + S2 + S3 + S4 + S5 + S6plus,
+                               daily_data = od,
+                               country_data = country_data,
                                serial_interval = serial.interval$fit,
                                ecdf_time = ecdf.saved, 
                                N0 = 6, 
