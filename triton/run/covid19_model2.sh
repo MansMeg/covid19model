@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=0-06:00:00
+#SBATCH --time=0-04:00:00
 #SBATCH --cpus-per-task=4
 
 # Defaults to directory of when submitted.  Explicit cd if needed (slurm defaults
@@ -10,6 +10,6 @@
 # If you use srun for each command, the mem/cpu usage of each step
 # can be seen individually with "slurm history"
 module load r/3.6.1-python3
-export PBS_JOBID="om1_ecdc"
-Rscript base_general_refactored_oxford1_ecdc.R base_general_speed --full
+export PBS_JOBID="model2"
+Rscript base_model2.R base_general_speed --full
 
