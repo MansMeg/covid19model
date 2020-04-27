@@ -1,0 +1,67 @@
+---
+title: "Report COVID19 Imperial Model"
+author: "Måns Magnusson"
+date: '2020-04-26'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(covid19imperial)
+library(ggplot2)
+library(bayesplot)
+m <- list()
+m[[1]] <- mget(load("../results/base_general_speed-base-stanfit.Rdata"))
+m[[2]] <- mget(load("../results/base_general_speed-om1_ecdc-stanfit.Rdata"))
+m[[3]] <- mget(load("../results/base_general_speed-om2_ecdc-stanfit.Rdata"))
+m[[4]] <- mget(load("../results/base_general_speed-om1_od-stanfit.Rdata"))
+m[[5]] <- mget(load("../results/base_general_speed-om2_od-stanfit.Rdata"))
+
+
+```
+
+## Model descriptions
+
+- Model 1: The basline model, previously included
+
+
+## Covariate effects
+
+```{r, include=TRUE, fig.width=7, fig.height=3}
+plot_models <- c(1,2,4)
+for(i in plot_models){
+  mod <- m[[plot_models[i]]]
+  p <- plot_covariate_size_effects(mod$fit, mod$stan_data) + ggtitle(paste0("Model", plot_models[i]))
+  print(p)
+}
+
+```
+
+
+
+## R0 for different countries
+
+```{r, include=TRUE, fig.width=7, fig.height=3}
+plot_models <- length(m)
+for(i in plot_models){
+  mod <- m[[plot_models[i]]]
+  p <- plot_mu(mod$fit, mod$stan_data) + ggtitle(paste0("Model", plot_models[i]))
+  print(p)
+}
+```
+
+
+## Infectious in all countries?
+
+```{r, include=TRUE, fig.width=12, fig.height=4}
+plot_models <- length(m)
+countries <- get_countries(m[[1]]$stan_data)
+for(country in countries){
+  for(i in plot_models){
+    mod <- m[[plot_models[i]]]
+    p <- plot_three_panel(country = country, stan_fit = mod$fit, stan_data = mod$stan_data, daily_data = mod$daily_data, title = paste0(country, ": Model", plot_models[i]))
+    print(p)
+  }
+}
+
+```
