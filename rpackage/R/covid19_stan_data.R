@@ -37,10 +37,7 @@ covid19_stan_data <- function(formula,
 
   countries <- levels(daily_data$country)
 
-  checkmate::assert_data_frame(country_data)
-  checkmate::assert_names(colnames(country_data), must.include = c("country", "total_population", "ifr"))
-  checkmate::assert_names(colnames(country_data), must.include = c("country", "total_population", "ifr"))
-  checkmate::assert_false(any(duplicated(country_data)))
+  assert_country_data(country_data)
   checkmate::assert_set_equal(country_data$country, countries)
 
   checkmate::assert_numeric(serial_interval, min.len = N2)
@@ -117,7 +114,7 @@ covid_stan_covariate_data <- function(formula, daily_data, N2 = NULL){
     dat[[countries[i]]] <- model.matrix(formula, tmp)
     intercept_idx <- which(colnames(dat[[countries[i]]]) == "(Intercept)")
     if(length(intercept_idx) == 1){
-      dat[[countries[i]]] <- dat[[countries[i]]][,-intercept_idx]
+      dat[[countries[i]]] <- dat[[countries[i]]][,-intercept_idx, drop = FALSE]
     } else {
       stop("Model needs to include an intercept (R0).", call. = FALSE)
     }
