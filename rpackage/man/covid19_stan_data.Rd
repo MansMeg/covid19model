@@ -18,10 +18,10 @@ covid19_stan_data(
 \arguments{
 \item{formula}{a R formula for the effect of covariates in [daily_data] on Rt}
 
-\item{daily_data}{a data.frame that contains variables 
+\item{daily_data}{a data.frame that contains variables
 by date, such as cases, deaths and date-specific covariates.}
 
-\item{country_data}{a data.frame that contains variables 
+\item{country_data}{a data.frame that contains variables
 by by country, such as [ifr] and [total_population]}
 
 \item{serial_interval}{Pre-calculated SI using emprical data from Neil}
@@ -36,13 +36,13 @@ by by country, such as [ifr] and [total_population]}
 Create input data to the COVID19 Stan model
 }
 \details{
-[daily_data] must include the following variables: 
+[daily_data] must include the following variables:
 * \code{date}
 * \code{country}
 * \code{cases} (the number of cases for that country and date)
 * \code{deaths} (the number of deaths for that country and date)
 
-[country_data] must include the following variables: 
+[country_data] must include the following variables:
 * \code{country} (the same countries as in [daily_data])
 * \code{ifr} (ifr per country)
 * \code{total_population}

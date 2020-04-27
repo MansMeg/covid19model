@@ -9,7 +9,7 @@ covid_stan_covariate_data(formula, daily_data, N2 = NULL)
 \arguments{
 \item{formula}{a R formula for the effect of covariates in [daily_data] on Rt}
 
-\item{daily_data}{a data.frame that contains variables 
+\item{daily_data}{a data.frame that contains variables
 by date, such as cases, deaths and date-specific covariates.}
 
 \item{N2}{number of days for which to impute infections}

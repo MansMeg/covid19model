@@ -7,7 +7,7 @@
 get_dates(daily_data)
 }
 \arguments{
-\item{daily_data}{a data.frame that contains variables 
+\item{daily_data}{a data.frame that contains variables
 by date, such as cases, deaths and date-specific covariates.}
 }
 \description{

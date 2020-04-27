@@ -4,7 +4,14 @@
 \alias{plot_three_panel}
 \title{Plot threeplot}
 \usage{
-plot_three_panel(country, stan_fit, stan_data, daily_data, plot_dates = NULL)
+plot_three_panel(
+  country,
+  stan_fit,
+  stan_data,
+  daily_data,
+  plot_dates = NULL,
+  title = NULL
+)
 }
 \arguments{
 \item{stan_fit}{a stan_fit object with [alpha] parameter draws}
