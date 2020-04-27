@@ -25,7 +25,20 @@ od <- dplyr::group_by(od, CountryCode)
 od <- tidyr::fill(od, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13)
 od <- tidyr::fill(od, S1.IsGeneral, S2.IsGeneral, S3.IsGeneral, S4.IsGeneral, S5.IsGeneral, S6.IsGeneral)
 
+data(ecdc)
+
+od$CountryName[od$CountryName == "United Kingdom"] <- "United_Kingdom"
+od <- dplyr::left_join(od,
+                       ecdc[, c("date", "Cases", "Deaths", "Countries.and.territories")],
+                       by = c("CountryName" = "Countries.and.territories", "Date" = "date"))
+colnames(od)[c(1, 3, 27, 28)] <- c("country", "date", "cases", "deaths")
+od$country <- as.factor(od$country)
+
+assert_daily_data(od)
+
 usethis::use_data(od, version = 2, overwrite = TRUE)
+
+
 
 
 
