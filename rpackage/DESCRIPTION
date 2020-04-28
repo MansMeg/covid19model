@@ -9,5 +9,9 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 RoxygenNote: 7.0.1
 Encoding: UTF-8
+Imports:
+    ggplot2,
+    lubridate,
+    matrixStats
 Suggests: 
     testthat (>= 2.1.0)

@@ -64,7 +64,7 @@ covid19_stan_data <- function(formula,
 
   Xs <- covid_stan_covariate_data(formula, daily_data = d1, N2 = N2)
 
-  Ns <- dplyr::summarise(dplyr::group_by(d1, country), N = n())
+  Ns <- dplyr::summarise(dplyr::group_by(d1, country), N = dplyr::n())
 
   f <- lapply(country_data[countries, "ifr"],
               probability_of_death_given_infection,
@@ -108,30 +108,35 @@ covid_stan_covariate_data <- function(formula, daily_data, N2 = NULL){
   checkmate::assert_int(N2, null.ok = TRUE, lower = 1)
 
   countries <- levels(daily_data$country)
-  dat <- list()
+
+  dat <- model.matrix(formula, daily_data)
+  intercept_idx <- which(colnames(dat) == "(Intercept)")
+  if(length(intercept_idx) == 1){
+    dat <- dat[,-intercept_idx, drop = FALSE]
+  } else {
+    stop("Model needs to include an intercept (R0).", call. = FALSE)
+  }
+  dats <- list()
   for(i in seq_along(countries)){
-    tmp <- daily_data[daily_data$country == countries[i],]
+    country <- countries[i]
+    tmp <- dat[daily_data$country == country, ,drop = FALSE]
     if(!is.null(N2)){
       N <- nrow(tmp)
-      tmp[N:N2,] <- tmp[N,]
+      pad_matrix <- matrix(rep(tmp[N,,drop = TRUE], N2 - N), ncol = ncol(tmp), byrow = TRUE)
+      tmp <- rbind(tmp, pad_matrix)
     }
-    dat[[countries[i]]] <- model.matrix(formula, tmp)
-    intercept_idx <- which(colnames(dat[[countries[i]]]) == "(Intercept)")
-    if(length(intercept_idx) == 1){
-      dat[[countries[i]]] <- dat[[countries[i]]][,-intercept_idx, drop = FALSE]
-    } else {
-      stop("Model needs to include an intercept (R0).", call. = FALSE)
-    }
+    dats[[countries[i]]] <- tmp
   }
   for(i in seq_along(dat)){
     checkmate::assert_true(all(dim(dat[[1]]) == dim(dat[[i]])), .var.name = names(dat)[i])
+    checkmate::assert_true(all(colnames(dat[[1]]) == colnames(dat[[i]])), .var.name = names(dat)[i])
   }
   # [1] 15 90  6
-  dat <- array(unlist(dat),
-               dim = c(nrow(dat[[1]]), ncol(dat[[1]]), length(dat)),
-               dimnames = list(rownames(dat[[1]]), colnames(dat[[1]]), names(dat)))
-  dat <- aperm(dat, c(3,1,2))
-  dat
+  dats <- array(unlist(dats),
+                dim = c(nrow(dats[[1]]), ncol(dats[[1]]), length(dats)),
+                dimnames = list(rownames(dats[[1]]), colnames(dats[[1]]), names(dats)))
+  dats <- aperm(dats, c(3,1,2))
+  dats
 }
 
 as_country_matrix <- function(x, country, N2, fill_value = -1){
