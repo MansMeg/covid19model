@@ -96,6 +96,11 @@ od <- od[od$date <= date_max,]
 od$cases[is.na(od$cases)] <- 0
 od$deaths[is.na(od$deaths)] <- 0
 
+# Fill missing values with latest known
+od <- od[order(od$CountryCode, od$date),]
+od <- dplyr::group_by(od, CountryCode)
+od <- tidyr::fill(od, StringencyIndex)
+
 
 set.seed(4711)
 # various distributions required for modeling
