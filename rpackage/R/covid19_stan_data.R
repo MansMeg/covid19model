@@ -33,7 +33,11 @@ covid19_stan_data <- function(formula,
                               verbose = TRUE){
   checkmate::assert_formula(formula)
   assert_daily_data(daily_data)
-  checkmate::assert_names(colnames(daily_data), must.include = attr(terms(formula), "term.labels"))
+  covariate_names <- attr(terms(formula), "term.labels")
+  checkmate::assert_names(colnames(daily_data), must.include = covariate_names)
+  for (covnm in covariate_names) {
+    checkmate::assert_vector(daily_data[[covnm]], any.missing = FALSE, .var.name = covnm)
+  }  
 
   countries <- levels(daily_data$country)
 
@@ -119,6 +123,9 @@ covid_stan_covariate_data <- function(formula, daily_data, N2 = NULL){
       stop("Model needs to include an intercept (R0).", call. = FALSE)
     }
   }
+  for(i in seq_along(dat)){
+    checkmate::assert_true(all(dim(dat[[1]]) == dim(dat[[i]])), .var.name = names(dat)[i])
+  }
   # [1] 15 90  6
   dat <- array(unlist(dat),
                dim = c(nrow(dat[[1]]), ncol(dat[[1]]), length(dat)),
@@ -182,6 +189,7 @@ assert_daily_data <- function(x){
   checkmate::assert_factor(x$country, any.missing = FALSE)
   countries <- levels(x$country)
   checkmate::assert_date(x$date, any.missing = FALSE)
+  checkmate::assert_true(all(table(x$country) > 5))
   for(country in countries){
     # Assert all intermediate days exist in daily data
     min_date <- min(x$date[x$country == country])
