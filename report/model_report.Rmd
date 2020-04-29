@@ -40,6 +40,12 @@ Potential ways forward:
 - Update data, ecdc and Oxford (until today instead of 10th of April)
 - Test different alpha priors
 
+### Strange jumps in Rt
+
+For some models there are som strange jumps in the Rt. In most cases it is small errors in data. This has hopefully been fixed with the Oxford data Version 5.
+
+Finland is a special case. The difference comes from first having a general recommendation on movement restrictions, and then have a target movement restriction that is less certain.
+
 
 ### Model descriptions
 
