@@ -1,42 +1,71 @@
 ---
 title: "Report COVID19 Imperial Model"
 author: "Måns Magnusson"
-date: '2020-04-26'
+date: '2020-04-29'
 output: 
   pdf_document: 
     toc: yes
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 library(covid19imperial)
 library(ggplot2)
 library(bayesplot)
 m <- list()
-m[[1]] <- mget(load("../results/base_general_speed-base-stanfit.Rdata"))
-m[[2]] <- mget(load("../results/base_general_speed-om1_ecdc-stanfit.Rdata"))
-m[[3]] <- mget(load("../results/base_general_speed-om2_ecdc-stanfit.Rdata"))
-m[[4]] <- mget(load("../results/base_general_speed-om1_od-stanfit.Rdata"))
-m[[5]] <- mget(load("../results/base_general_speed-om2_od-stanfit.Rdata"))
+m[[1]] <- mget(load("../results/base_general_speed-model1_base-stanfit.Rdata"))
+m[[2]] <- mget(load("../results/base_general_speed-model2-stanfit.Rdata"))
+m[[3]] <- mget(load("../results/base_general_speed-model3-stanfit.Rdata"))
 
+countries <- get_countries(m[[2]]$stan_data)
 
 ```
 
-## Model descriptions
+## Summary / Take Away
 
-- Model 1: The baseline model, previously included, without partial pooling
-- Model 2: The model using S1 - S7 oxford variables and ECDC data
-- Model 2: The model using S1 - S7 oxford variables and ECDC data
+- Using the increased number of covariates (model2) seem to be better, model-wise compared to baseline. 
+- There seem to be something problematic with the lockdown variable in model 1. The new model from the Imperial Collage group include an hiearchical prior here to accomodate different effects.
+
+Current flaws to be fixed:
+
+- IFR for Finland now set to IFR for Sweden
+- Data only until the 10th of April.
+
+Potential ways forward:
+
+- Use hospitalizations instead of deaths. I think this has better quality and is more data.
+- Focus on Finland (and Sweden) at county level, although data may be missing.
+- Include serological studies to estimate cumulative infections, weekly.
+- Include mobility data both together with other covariates as a single factor.
+- Update data, ecdc and Oxford (until today instead of 10th of April)
+- Test different alpha priors
+
+
+### Model descriptions
+
+- Model 1: The baseline model, previously included, without partial pooling (the most recent model)
+- Model 2: The model using S1 - S7 oxford variables
+- Model 3: The model using SeverityIndex (continous variable) 
+
+### Oxford covariate descriptions
+
+- S1: School closing
+- S2: Workplace closing
+- S3: Cancel public events
+- S4: Close public transport
+- S5: Public information Campagins
+- S6: Restrictions on internal movement (1 = General, 0 = geographic)
+
 
 
 ## Covariate effects
 
 ```{r, include=TRUE, fig.width=7, fig.height=3}
-plot_models <- c(1,2,4)
+plot_models <- c(1,2)
 for(i in seq_along(plot_models)){
   mod <- m[[plot_models[i]]]
   p <- plot_covariate_size_effects(mod$fit, mod$stan_data) + ggtitle(paste0("Model", plot_models[i]))
-  print(p)
+  suppressWarnings(print(p))
 }
 
 ```
@@ -49,13 +78,13 @@ for(i in seq_along(plot_models)){
 plot_models <- 1:length(m)
 for(i in seq_along(plot_models)){
   mod <- m[[plot_models[i]]]
-  p <- plot_mu(mod$fit, mod$stan_data) + ggtitle(paste0("Model", plot_models[i]))
+  p <- plot_mu(mod$fit, mod$stan_data, countries) + ggtitle(paste0("Model", plot_models[i]))
   print(p)
 }
 ```
 
 
-## Infectious in all countries?
+## Infectious, deaths and Rt
 
 ```{r, include=TRUE, fig.width=12, fig.height=4}
 plot_models <- 1:length(m)
@@ -67,5 +96,18 @@ for(country in countries){
     print(p)
   }
 }
+
+```
+
+## Stan code
+
+```{r, include=TRUE, fig.width=12, fig.height=4}
+print(m[[1]]$fit@stanmodel)
+
+#plot_models <- 1:length(m)
+#for(i in seq_along(plot_models)){
+#  print(paste0(" ######## MODEL", i, " ######## "))
+#  print(m[[i]]$fit@stanmodel)
+#}
 
 ```
