@@ -3,14 +3,18 @@
 #' @inheritParams plot_covariate_size_effects
 #' 
 #' @export
-plot_mu <- function(stan_fit, stan_data){
+plot_mu <- function(stan_fit, stan_data, countries = NULL){
   checkmate::assert_class(stan_fit, "stanfit")
   checkmate::assert_true(any(grepl(names(stan_fit), pattern = "^alpha")))
   assert_stan_data(stan_data)
+  checkmate::assert_subset(countries, choices = get_countries(stan_data))
   
   out <- rstan::extract(stan_fit)
   mu <- (as.matrix(out$mu))
-  colnames(mu) <-  dimnames(stan_data$X)[[1]]
+  colnames(mu) <- get_countries(stan_data)
+  if(!is.null(countries)){
+    mu <- mu[,countries]
+  }
   g <- bayesplot::mcmc_intervals(mu,prob = .9)
   g
 }

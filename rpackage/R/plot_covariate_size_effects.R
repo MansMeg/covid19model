@@ -4,6 +4,7 @@
 #' @param stan_data a stan_data object with named design matrix array
 #' @param file a [rda] file containing a [stan_data] and [stan_fit] object
 #' 
+#' @importFrom bayesplot vline_0
 #' @export
 plot_covariate_size_effects <- function(stan_fit, stan_data){
   checkmate::assert_class(stan_fit, "stanfit")

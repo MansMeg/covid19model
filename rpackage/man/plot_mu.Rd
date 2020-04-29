@@ -7,7 +7,7 @@
 \alias{plot_Rt_from_file}
 \title{Plot covariate size effects}
 \usage{
-plot_mu(stan_fit, stan_data)
+plot_mu(stan_fit, stan_data, countries = NULL)
 
 plot_mu_from_file(file_path)
 
