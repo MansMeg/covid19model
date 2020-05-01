@@ -45,6 +45,9 @@ odv4$S6plus[odv4$S6 == "Restrict movement"] <-
 odv4$S1b <- odv4$S1
 levels(odv4$S1b) <- list("No measures"=c("No measures", "Recommend closing"), "Require closing"=c("Require closing"))
 
+# Fill out NA for StringencyIndex
+odv4 <- dplyr::group_by(odv4, country)
+odv4 <- tidyr::fill(odv4, StringencyIndex)
 
 assert_daily_data(odv4)
 usethis::use_data(odv4, version = 2, overwrite = TRUE)
