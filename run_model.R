@@ -8,7 +8,7 @@ library(EnvStats)
 library(magrittr)
 library(optparse)
 # remotes::install_local("rpackage", force = TRUE)
-library(covid19imperial)
+library(covid19model)
 
 
 # Commandline options and parsing
@@ -47,7 +47,8 @@ data(country_data)
 serial.interval <- read.csv("data/serial_interval.csv")
 
 # Read in daily_data from cfg
-eval(parse(text = paste0("data(", cfg$data$daily_data, "); daily_data <- ", cfg$data$daily_data)))
+eval(parse(text = paste0("data(", cfg$data$daily_data, ")")))
+eval(parse(text = paste0("daily_data <- ", cfg$data$daily_data)))
 
 # Parameters
 N2 = cfg$model_arguments$N2 # increase if you need more forecast
@@ -87,7 +88,7 @@ stan_data <- covid19_stan_data(formula_from_cfg,
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 StanModel <- cfg$model_arguments$stan_model
-m = stan_model(paste0('stan-models/',StanModel,'.stan'))
+m = stan_model(paste0('stan-models/',StanModel))
 
 
 if(DEBUG) {
