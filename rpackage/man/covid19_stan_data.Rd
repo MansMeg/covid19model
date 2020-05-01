@@ -2,6 +2,9 @@
 % Please edit documentation in R/covid19_stan_data.R
 \name{covid19_stan_data}
 \alias{covid19_stan_data}
+\alias{get_reported_cases}
+\alias{get_deaths}
+\alias{get_countries}
 \title{Create input data to the COVID19 Stan model}
 \usage{
 covid19_stan_data(
@@ -14,6 +17,12 @@ covid19_stan_data(
   N2 = 90,
   verbose = TRUE
 )
+
+get_reported_cases(daily_data)
+
+get_deaths(daily_data)
+
+get_countries(stan_data)
 }
 \arguments{
 \item{formula}{a R formula for the effect of covariates in [daily_data] on Rt}

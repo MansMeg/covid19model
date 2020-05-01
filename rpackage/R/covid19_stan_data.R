@@ -220,7 +220,7 @@ get_dates <- function(daily_data){
   split(d1$date, d1$country)
 }
 
-#' @rdname stan_data
+#' @rdname covid19_stan_data
 #' @export
 get_reported_cases <- function(daily_data){
   assert_daily_data(daily_data)
@@ -230,7 +230,7 @@ get_reported_cases <- function(daily_data){
   split(d1$cases, d1$country)
 }
 
-#' @rdname stan_data
+#' @rdname covid19_stan_data
 #' @export
 get_deaths <- function(daily_data){
   assert_daily_data(daily_data)
@@ -240,7 +240,7 @@ get_deaths <- function(daily_data){
   split(d1$deaths, d1$country)
 }
 
-#' @rdname stan_data
+#' @rdname covid19_stan_data
 #' @export
 get_countries <- function(stan_data){
   assert_stan_data(stan_data)

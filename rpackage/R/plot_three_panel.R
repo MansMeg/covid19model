@@ -102,7 +102,7 @@ plot_infections <- function(country, stan_fit, stan_data, daily_data){
 
 
 
-#' @rdname plot_deaths
+#' @rdname plot_infections
 #' @export
 plot_deaths <- function(country, stan_fit, stan_data, daily_data){
   checkmate::assert_class(stan_fit, "stanfit")
@@ -199,7 +199,7 @@ plot_deaths <- function(country, stan_fit, stan_data, daily_data){
   p2
 }
 
-#' @rdname plot_deaths
+#' @rdname plot_infections
 #' @export
 plot_Rt <- function(country, stan_fit, stan_data, daily_data, plot_dates = NULL){
   checkmate::assert_class(stan_fit, "stanfit")
