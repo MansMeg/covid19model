@@ -9,11 +9,11 @@ module load r/3.6.1-python3
 # Setup yml config file
 cat > config.yml <<EOF
 
-job_id: "model1_0410"
+job_id: "model3_0410"
 
 model_arguments:
   stan_model: "base_general_speed.stan"
-  model_formula: "~ schools...universities + self.isolating.if.ill + public.events + any.intervention + lockdown + social.distancing.encouraged"
+  model_formula: "~ StringencyIndex"
   N2: 90
   seed: 4711
   date:
@@ -22,7 +22,7 @@ model_arguments:
 
 data:
   countries: ["Denmark", "Italy", "Germany", "Spain", "United_Kingdom", "France", "Norway", "Belgium", "Austria", "Sweden", "Switzerland", "Greece", "Portugal", "Netherlands", "Finland"]
-  daily_data: "icv3"
+  daily_data: "odv4"
 
 stan_arguments:
   iter: 4000
@@ -36,9 +36,10 @@ stan_arguments:
 EOF
 
 # Run model
-Rscript run_model.R config.yml
+Rscript run_model.R config.yml --debug
 
 # Remove config
 rm config.yml
 
 date
+
