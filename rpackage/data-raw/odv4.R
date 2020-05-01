@@ -25,7 +25,8 @@ od <- dplyr::group_by(od, CountryCode)
 od <- tidyr::fill(od, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13)
 od <- tidyr::fill(od, S1.IsGeneral, S2.IsGeneral, S3.IsGeneral, S4.IsGeneral, S5.IsGeneral, S6.IsGeneral)
 
-data(ecdc)
+ecdc <- readRDS('../data/COVID-19-up-to-date.rds')
+ecdc$date <- lubridate::dmy(ecdc$DateRep)
 
 od$CountryName[od$CountryName == "United Kingdom"] <- "United_Kingdom"
 od <- dplyr::left_join(od,

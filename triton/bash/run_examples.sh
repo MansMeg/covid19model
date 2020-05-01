@@ -5,7 +5,7 @@ Rscript base_model1_base.R base_general_speed --debug
 Rscript base_model2.R base_general_speed --debug
 Rscript base_model3.R base_general_speed --debug
 
-Rscript run_model.R triton/configs/model1.yml --debug
+Rscript run_model.R triton/configs/model1.yml
 
 slurm q
 
