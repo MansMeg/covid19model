@@ -36,10 +36,9 @@ od$country <- as.factor(od$country)
 
 assert_daily_data(od)
 
-usethis::use_data(od, version = 2, overwrite = TRUE)
+odv4 <- od
 
-
-
+usethis::use_data(odv4, version = 2, overwrite = TRUE)
 
 
 if(FALSE){
