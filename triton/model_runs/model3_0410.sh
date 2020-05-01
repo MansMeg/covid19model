@@ -36,7 +36,7 @@ stan_arguments:
 EOF
 
 # Run model
-Rscript run_model.R config.yml --debug
+Rscript run_model.R config.yml
 
 # Remove config
 rm config.yml

@@ -46,6 +46,7 @@ odv4$S1b <- odv4$S1
 levels(odv4$S1b) <- list("No measures"=c("No measures", "Recommend closing"), "Require closing"=c("Require closing"))
 
 # Fill out NA for StringencyIndex
+odv4 <- odv4[order(odv4$country, odv4$date),]
 odv4 <- dplyr::group_by(odv4, country)
 odv4 <- tidyr::fill(odv4, StringencyIndex)
 

@@ -13,7 +13,7 @@ job_id: "model2_0410"
 
 model_arguments:
   stan_model: "base_general_speed.stan"
-  model_formula: "~ S1 + S2 + S3 + S4 + S5 + S6plus"
+  model_formula: "~ S1b + S2 + S3 + S4 + S5 + S6plus"
   N2: 90
   seed: 4711
   date:
