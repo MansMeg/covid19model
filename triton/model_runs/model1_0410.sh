@@ -38,7 +38,7 @@ stan_arguments:
 EOF
 
 # Run model
-Rscript run_model.R $JOB_ID.yml --debug
+Rscript run_model.R $JOB_ID.yml
 
 # Remove config
 rm $JOB_ID.yml
