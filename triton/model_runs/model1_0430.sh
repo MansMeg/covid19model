@@ -9,12 +9,12 @@ module load r/3.6.1-python3
 # Setup yml config file
 cat > config.yml <<EOF
 
-job_id: "model1_0410"
+job_id: "model1_0430"
 
 model_arguments:
   stan_model: "base_general_speed.stan"
   model_formula: "~ schools...universities + self.isolating.if.ill + public.events + any.intervention + lockdown + social.distancing.encouraged"
-  N2: 90
+  N2: 110
   seed: 4711
   date:
     start: "2020-01-01"
