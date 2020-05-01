@@ -11,29 +11,30 @@ job_id: "model1_0410"
 
 model_arguments:
   stan_model: "base_general_speed.stan"
-  model_formula: "schools...universities + self.isolating.if.ill + public.events + any.intervention + lockdown + social.distancing.encouraged"
+  model_formula: "~ schools...universities + self.isolating.if.ill + public.events + any.intervention + lockdown + social.distancing.encouraged"
   N2: 90
+  seed: 4711
   date:
     start: "2020-01-01"
     end: "2020-04-10"
 
 data:
   countries: ["Denmark", "Italy", "Germany", "Spain", "United_Kingdom", "France", "Norway", "Belgium", "Austria", "Sweden", "Switzerland", "Greece", "Portugal", "Netherlands", "Finland"]
-  daily_data: "odv4"
+  daily_data: "icv3"
 
 stan_arguments:
-  iter: 20
-  warmup: 10
-  chains: 1
-  thin: 1
+  iter: 4000
+  warmup: 2000
+  chains: 4
+  thin: 4
   control:
-    adapt_delta: 0.8
+    adapt_delta: 0.95
     max_treedepth: 10
 
 EOF
 
 # Run model
-Rscript run_model.R config.yml
+Rscript run_model.R config.yml --debug
 
 # Remove config
 rm config.yml

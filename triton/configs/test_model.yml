@@ -4,6 +4,7 @@ model_arguments:
   stan_model: "base_general_speed.stan"
   model_formula: "~ S1"
   N2: 90
+  seed: 4711
   date:
     start: "2020-01-01"
     end: "2020-04-10"

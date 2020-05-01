@@ -65,7 +65,7 @@ daily_data$deaths[is.na(daily_data$deaths)] <- 0
 assert_daily_data(daily_data)
 
 
-set.seed(4711)
+set.seed(cfg$model_arguments$seed)
 # various distributions required for modeling
 mean1 = 5.1; cv1 = 0.86; # infection to onset
 mean2 = 18.8; cv2 = 0.45 # onset to death

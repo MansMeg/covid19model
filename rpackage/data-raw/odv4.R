@@ -1,4 +1,5 @@
 ## code to prepare `DATASET` dataset goes here
+library(covid19model)
 library(covidresponser)
 countries <- c("DNK", "ITA", "DEU", "ESP", "GBR", "FRA", "NOR", "BEL", "AUT", "SWE", "CHE", "GRC", "PRT", "NLD", "FIN")
 
@@ -35,10 +36,17 @@ od <- dplyr::left_join(od,
 colnames(od)[c(1, 3, 27, 28)] <- c("country", "date", "cases", "deaths")
 od$country <- as.factor(od$country)
 
-assert_daily_data(od)
-
 odv4 <- od
 
+# Create additional variables
+odv4$S6plus <- as.character(odv4$S6)
+odv4$S6plus[odv4$S6 == "Restrict movement"] <-
+  paste0(odv4$S6[odv4$S6 == "Restrict movement"], odv4$S6.IsGeneral[odv4$S6 == "Restrict movement"])
+odv4$S1b <- odv4$S1
+levels(odv4$S1b) <- list("No measures"=c("No measures", "Recommend closing"), "Require closing"=c("Require closing"))
+
+
+assert_daily_data(odv4)
 usethis::use_data(odv4, version = 2, overwrite = TRUE)
 
 
