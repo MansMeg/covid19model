@@ -4,12 +4,14 @@
 
 date
 
+export JOB_ID="model2_0430"
+
 module load r/3.6.1-python3
 
 # Setup yml config file
-cat > config.yml <<EOF
+cat > $JOB_ID.yml <<EOF
 
-job_id: "model2_0430"
+job_id: "$JOB_ID"
 
 model_arguments:
   stan_model: "base_general_speed.stan"
@@ -36,10 +38,10 @@ stan_arguments:
 EOF
 
 # Run model
-Rscript run_model.R config.yml
+Rscript run_model.R $JOB_ID.yml
 
 # Remove config
-rm config.yml
+rm $JOB_ID.yml
 
 date
 

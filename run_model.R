@@ -110,5 +110,5 @@ print(sprintf("Jobid = %s",JOBID))
 
 
 
-save(fit, stan_data, daily_data, country_data, cfg, file=paste0('results/',StanModel,'-',JOBID,'-stanfit.Rdata'))
+save(fit, stan_data, daily_data, country_data, cfg, file=paste0('results/', JOBID, '-stanfit.Rdata'))
 
