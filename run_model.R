@@ -32,10 +32,16 @@ if(DEBUG) {
 
 # Read in config
 cfg_path <- cmdoptions$args[1]
-# cfg_path <- "config.yml"
+# cfg_path <- "triton/configs/test_model.yml"
 cfg <- yaml::read_yaml(cfg_path)
 cat(yaml::as.yaml(cfg))
 
+# Read in libraries
+if (!is.null(cfg$libraries)){
+  for(i in seq_along(cfg$libraries)){
+    eval(parse(text = paste0("library(", cfg$libraries[i], ")")))
+  }
+}
 
 ## Ensure that output directories exist
 dir.create("results/", showWarnings = FALSE, recursive = TRUE)
@@ -45,7 +51,7 @@ dir.create("web/", showWarnings = FALSE, recursive = TRUE)
 ## Reading all data
 data(country_data)
 serial.interval <- read.csv("data/serial_interval.csv")
-si <- c(serial.interval$fit, rep(0, 100))
+serial_interval <- c(serial.interval$fit, rep(0, 100))
 
 # Read in daily_data from cfg
 eval(parse(text = paste0("data(", cfg$data$daily_data, ")")))
@@ -78,10 +84,10 @@ ecdf.saved = ecdf(x1+x2)
 
 # Note that the Stan model already includes an intercept
 formula_from_cfg <- eval(parse(text = cfg$model_arguments$model_formula))
-stan_data <- covid19_stan_data(formula_from_cfg,
+stan_data <- covid19_stan_data(formula = formula_from_cfg,
                                daily_data = daily_data,
                                country_data = country_data,
-                               serial_interval = si,
+                               serial_interval = serial_interval,
                                ecdf_time = ecdf.saved, 
                                N0 = 6, 
                                N2 = N2)

@@ -20,6 +20,7 @@ get_epidemic_period_data <-
   
   countries <- levels(x$country)
   x$country <- as.character(x$country)
+  x <- dplyr::arrange(x, country, date)
   x <- dplyr::group_by(x, country)
   x <- dplyr::mutate(x, row_number = dplyr::row_number())
   x <- dplyr::left_join(x, data.frame(country = names(idxs$index2),
@@ -27,6 +28,8 @@ get_epidemic_period_data <-
                                       stringsAsFactors = FALSE),
                         by = "country")
   x <- dplyr::filter(x, start <= row_number)
+  x <- dplyr::mutate(x, t = dplyr::row_number())
+
   x$start <- NULL
   x$row_number <- NULL
   x$country <- factor(x$country, levels = countries)

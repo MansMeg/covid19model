@@ -33,11 +33,6 @@ covid19_stan_data <- function(formula,
                               verbose = TRUE){
   checkmate::assert_formula(formula)
   assert_daily_data(daily_data)
-  covariate_names <- attr(terms(formula), "term.labels")
-  checkmate::assert_names(colnames(daily_data), must.include = covariate_names)
-  for (covnm in covariate_names) {
-    checkmate::assert_vector(daily_data[[covnm]], any.missing = FALSE, .var.name = covnm)
-  }  
 
   countries <- levels(daily_data$country)
 
@@ -104,12 +99,13 @@ covid19_stan_data <- function(formula,
 covid_stan_covariate_data <- function(formula, daily_data, N2 = NULL){
   checkmate::assert_formula(formula)
   assert_daily_data(daily_data)
-  checkmate::assert_names(colnames(daily_data), must.include = attr(terms(formula), "term.labels"))
   checkmate::assert_int(N2, null.ok = TRUE, lower = 1)
 
   countries <- levels(daily_data$country)
 
-  dat <- model.matrix(formula, daily_data)
+  dat <- model.matrix(formula, data = daily_data)
+  checkmate::assert_matrix(dat, any.missing = FALSE, .var.name = "Design matrix")
+
   intercept_idx <- which(colnames(dat) == "(Intercept)")
   if(length(intercept_idx) == 1){
     dat <- dat[,-intercept_idx, drop = FALSE]
@@ -127,9 +123,9 @@ covid_stan_covariate_data <- function(formula, daily_data, N2 = NULL){
     }
     dats[[countries[i]]] <- tmp
   }
-  for(i in seq_along(dat)){
-    checkmate::assert_true(all(dim(dat[[1]]) == dim(dat[[i]])), .var.name = names(dat)[i])
-    checkmate::assert_true(all(colnames(dat[[1]]) == colnames(dat[[i]])), .var.name = names(dat)[i])
+  for(i in seq_along(dats)){
+    checkmate::assert_true(all(dim(dats[[1]]) == dim(dats[[i]])), .var.name = names(dats)[i])
+    checkmate::assert_true(all(colnames(dats[[1]]) == colnames(dats[[i]])), .var.name = names(dats)[i])
   }
   # [1] 15 90  6
   dats <- array(unlist(dats),

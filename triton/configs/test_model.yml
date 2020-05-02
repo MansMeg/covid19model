@@ -1,5 +1,9 @@
 job_id: "model1_debug"
 
+# R libraries to include
+libraries: 
+  - splines
+
 model_arguments:
   stan_model: "base_general_speed.stan"
   model_formula: "~ S1"
