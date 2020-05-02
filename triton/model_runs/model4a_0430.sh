@@ -18,7 +18,7 @@ libraries:
 
 model_arguments:
   stan_model: "base_general_speed_alpha.stan"
-  model_formula: "~ bs(t, df = 3, degree = 2)"
+  model_formula: "~ bs(t, df = 5, degree = 3)"
   N2: 110
   seed: 4711
   date:

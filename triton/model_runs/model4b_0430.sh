@@ -18,7 +18,7 @@ libraries:
 
 model_arguments:
   stan_model: "base_general_speed_alpha.stan"
-  model_formula: "~ bs(StringencyIndex, df = 3, degree = 2)"
+  model_formula: "~ bs(StringencyIndex, df = 5, degree = 3)"
   N2: 110
   seed: 4711
   date:
@@ -41,6 +41,7 @@ stan_arguments:
 EOF
 
 # Run model
+# To debug: Sys.setenv(DEBUG = "TRUE")
 Rscript run_model.R $JOB_ID.yml
 
 # Remove config
