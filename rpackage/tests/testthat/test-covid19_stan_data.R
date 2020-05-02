@@ -84,3 +84,21 @@ test_that("covid19_stan_data returns a correct object", {
   }
   
 })
+
+
+test_that("covid19_stan_data can use splines", {
+  library(splines)
+  load(test_path("data/daily_test_data.rda"))
+  load(test_path("data/stan_data_input.rda"))
+  
+  expect_silent(
+    sd <- covid19_stan_data(formula = ~ bs(t, df = 3, degree = 2),
+                            daily_data = daily_test_data,
+                            country_data = country_data,
+                            serial_interval = serial_interval,
+                            ecdf_time = ecdf.saved, 
+                            N0 = 6, 
+                            N2 = 90)
+  )
+
+})

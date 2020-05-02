@@ -104,6 +104,10 @@ covid_stan_covariate_data <- function(formula, daily_data, N2 = NULL){
   countries <- levels(daily_data$country)
 
   dat <- model.matrix(formula, data = daily_data)
+  if(nrow(dat) != nrow(daily_data)){
+    stop("Missing data/values in daily_data. Aborting.", call. = FALSE)
+  }
+  
   checkmate::assert_matrix(dat, any.missing = FALSE, .var.name = "Design matrix")
 
   intercept_idx <- which(colnames(dat) == "(Intercept)")
@@ -184,7 +188,7 @@ assert_stan_data <- function(x){
 #' @rdname assert_stan_data
 #' @export
 assert_daily_data <- function(x){
-  checkmate::assert_data_frame(x)
+  checkmate::assert_data_frame(x, .var.name = "daily_data")
   checkmate::assert_names(colnames(x), must.include = c("date", "country", "cases", "deaths"))
   checkmate::assert_factor(x$country)
   checkmate::assert_factor(x$country, any.missing = FALSE)
@@ -201,6 +205,7 @@ assert_daily_data <- function(x){
                                 .var.name = paste0("daily_data$date[daily_data$country == '",country,"']"))
   }
   checkmate::assert_false(any(duplicated(x)))
+  
 }
 
 #' Access dates for the epidemic period by country
