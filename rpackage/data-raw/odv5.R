@@ -9,7 +9,9 @@ full_names <- names(odv5raw)
 
 # Store raw data
 usethis::use_data(odv5raw, version = 2, overwrite = TRUE)
+# data(odv5raw)
 odv5 <- odv5raw
+
 
 # Clean variable names
 ig <- stringr::str_detect(names(odv5), pattern = "Flag")
@@ -32,7 +34,7 @@ for(i in seq_along(var_nms)){
 odv5 <- odv5[order(odv5$CountryCode, odv5$Date),]
 odv5 <- dplyr::group_by(odv5, CountryCode)
 odv5 <- tidyr::fill(odv5, C1, C2, C3, C4, C5, C6, C7, C8, H1, H2, H3)
-#od <- tidyr::fill(od, S1.IsGeneral, S2.IsGeneral, S3.IsGeneral, S4.IsGeneral, S5.IsGeneral, S6.IsGeneral)
+odv5 <- tidyr::fill(odv5, StringencyIndex)
 
 ecdc <- readRDS('../data/COVID-19-up-to-date.rds')
 ecdc$date <- lubridate::dmy(ecdc$DateRep)
@@ -60,7 +62,7 @@ download.file(google_file,destfile = tmpf)
 g <- read.csv(tmpf, stringsAsFactors = FALSE)
 g <- g[!is.na(g$country_region),]
 g$date <- as.Date(g$date)
-g$country_region[g$country_region == "United Kingdom"] <- "United_Kingdom" 
+g$country_region[g$country_region == "United Kingdom"] <- "United_Kingdom"
 
 g <- g[g$country_region %in% levels(odv5$country),]
 g <- g[g$sub_region_1 == "",]
@@ -69,13 +71,14 @@ names(g) <- stringr::str_replace_all(names(g), pattern = "_percent_change_from_b
 g$sub_region_1 <- NULL
 g$sub_region_2 <- NULL
 
-odv5g <- dplyr::left_join(odv5, g, 
+odv5$country <- as.character(odv5$country)
+odv5g <- dplyr::left_join(odv5, g,
                           by = c("country" = "country_region", "date" = "date"))
 
 odv5g <- odv5g[order(odv5g$country, odv5g$date),]
 odv5g <- dplyr::group_by(odv5g, CountryCode)
-odv5g <- tidyr::fill(odv5g, 
-                     country_region_code, 
+odv5g <- tidyr::fill(odv5g,
+                     country_region_code,
                      retail_and_recreation,
                      grocery_and_pharmacy,
                      parks,
