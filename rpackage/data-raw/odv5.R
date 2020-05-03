@@ -51,11 +51,42 @@ colnames(odv5)[colnames(odv5) == "Deaths"] <- "deaths"
 odv5$country <- as.factor(odv5$country)
 
 assert_daily_data(odv5)
-
 usethis::use_data(odv5, version = 2, overwrite = TRUE)
 
+# Add google mobility data
+google_file <- "https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv"
+tmpf <- tempfile()
+download.file(google_file,destfile = tmpf)
+g <- read.csv(tmpf, stringsAsFactors = FALSE)
+g <- g[!is.na(g$country_region),]
+g$date <- as.Date(g$date)
+g$country_region[g$country_region == "United Kingdom"] <- "United_Kingdom" 
 
+g <- g[g$country_region %in% levels(odv5$country),]
+g <- g[g$sub_region_1 == "",]
+g <- g[g$sub_region_2 == "",]
+names(g) <- stringr::str_replace_all(names(g), pattern = "_percent_change_from_baseline", replacement = "")
+g$sub_region_1 <- NULL
+g$sub_region_2 <- NULL
 
+odv5g <- dplyr::left_join(odv5, g, 
+                          by = c("country" = "country_region", "date" = "date"))
+
+odv5g <- odv5g[order(odv5g$country, odv5g$date),]
+odv5g <- dplyr::group_by(odv5g, CountryCode)
+odv5g <- tidyr::fill(odv5g, 
+                     country_region_code, 
+                     retail_and_recreation,
+                     grocery_and_pharmacy,
+                     parks,
+                     transit_stations,
+                     workplaces,
+                     residential,
+                     .direction = "downup")
+odv5g$country <- as.factor(odv5g$country)
+
+assert_daily_data(odv5g)
+usethis::use_data(odv5g, version = 2, overwrite = TRUE)
 
 
 if(FALSE){
