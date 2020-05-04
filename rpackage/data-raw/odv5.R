@@ -150,6 +150,9 @@ odv5g <- tidyr::fill(odv5g,
                      .direction = "downup")
 odv5g$country <- as.factor(odv5g$country)
 
+# Manual fix of variable
+odv5g$neg_log_transit_proportion <- -log(pmin((1+odv5g$transit_stations/100), 1))
+
 assert_daily_data(odv5g)
 usethis::use_data(odv5g, version = 2, overwrite = TRUE)
 
