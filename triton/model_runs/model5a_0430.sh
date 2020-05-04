@@ -17,8 +17,8 @@ libraries:
   - splines
 
 model_arguments:
-  stan_model: "base_general_speed_alpha.stan"
-  model_formula: "~ transit_stations"
+  stan_model: "base_general_speed.stan"
+  model_formula: "~ neg_log_transit_proportion"
   N2: 110
   seed: 4711
   date:

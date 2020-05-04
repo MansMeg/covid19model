@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=0-04:00:00
+#SBATCH --time=0-12:00:00
 #SBATCH --cpus-per-task=4
 
 date
@@ -17,8 +17,8 @@ libraries:
   - splines
 
 model_arguments:
-  stan_model: "base_general_speed_alpha.stan"
-  model_formula: "~ C1b + C2b + C3b + C4b + C5b + C6b + H2b + transit_stations"
+  stan_model: "base_general_speed.stan"
+  model_formula: "~ C1b + C2b + C3b + C4b + C5b + C6b + H2b"
   N2: 110
   seed: 4711
   date:

@@ -17,8 +17,8 @@ libraries:
   - splines
 
 model_arguments:
-  stan_model: "base_general_speed_alpha.stan"
-  model_formula: "~ bs(transit_stations, df = 5, degree = 3) + bs(StringencyIndex, df = 5, degree = 3)"
+  stan_model: "base_general_speed.stan"
+  model_formula: "~ neg_log_transit_proportion + StringencyIndex"
   N2: 110
   seed: 4711
   date:

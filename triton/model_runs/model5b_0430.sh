@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=0-04:00:00
+#SBATCH --time=0-08:00:00
 #SBATCH --cpus-per-task=4
 
 date
@@ -17,8 +17,8 @@ libraries:
   - splines
 
 model_arguments:
-  stan_model: "base_general_speed_alpha.stan"
-  model_formula: "~ bs(transit_stations, df = 5, degree = 3)"
+  stan_model: "base_general_speed.stan"
+  model_formula: "~ bs(neg_log_transit_proportion, df = 5, degree = 3)"
   N2: 110
   seed: 4711
   date:

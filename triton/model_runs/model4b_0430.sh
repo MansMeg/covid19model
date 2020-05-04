@@ -17,7 +17,7 @@ libraries:
   - splines
 
 model_arguments:
-  stan_model: "base_general_speed_alpha.stan"
+  stan_model: "base_general_speed.stan"
   model_formula: "~ bs(StringencyIndex, df = 5, degree = 3)"
   N2: 110
   seed: 4711
