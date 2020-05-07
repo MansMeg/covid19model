@@ -33,6 +33,7 @@ if(DEBUG) {
 # Read in config
 cfg_path <- cmdoptions$args[1]
 # cfg_path <- "triton/configs/test_model.yml"
+# cfg_path <- "triton/configs/model5a_0430.yml"
 cfg <- yaml::read_yaml(cfg_path)
 cat(yaml::as.yaml(cfg))
 
@@ -84,7 +85,13 @@ ecdf.saved = ecdf(x1+x2)
 
 # Note that the Stan model already includes an intercept
 formula_from_cfg <- eval(parse(text = cfg$model_arguments$model_formula))
+if(!is.null(cfg$model_arguments$model_formula_hiearchy)){
+  formula_hiearchy_from_cfg <- eval(parse(text = cfg$model_arguments$model_formula_hiearchy))
+} else {
+  formula_hiearchy_from_cfg <- NULL
+}
 stan_data <- covid19_stan_data(formula = formula_from_cfg,
+                               formula_hiearchy = formula_hiearchy_from_cfg,
                                daily_data = daily_data,
                                country_data = country_data,
                                serial_interval = serial_interval,
