@@ -1,0 +1,28 @@
+
+job_id: "model5a_0430"
+
+libraries:
+  - splines
+
+model_arguments:
+  stan_model: "base_general_speed.stan"
+  model_formula: "~ neg_log_transit_proportion"
+  N2: 110
+  seed: 4711
+  date:
+    start: "2020-01-01"
+    end: "2020-04-30"
+
+data:
+  countries: ["Denmark", "Italy", "Germany", "Spain", "United_Kingdom", "France", "Norway", "Belgium", "Austria", "Sweden", "Switzerland", "Greece", "Portugal", "Netherlands", "Finland"]
+  daily_data: "odv5g"
+
+stan_arguments:
+  iter: 4000
+  warmup: 2000
+  chains: 4
+  thin: 4
+  control:
+    adapt_delta: 0.95
+    max_treedepth: 10
+

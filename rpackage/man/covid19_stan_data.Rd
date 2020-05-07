@@ -15,6 +15,7 @@ covid19_stan_data(
   ecdf_time,
   N0 = 6,
   N2 = 90,
+  formula_hiearchy = NULL,
   verbose = TRUE
 )
 

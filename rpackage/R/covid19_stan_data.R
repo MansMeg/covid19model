@@ -30,10 +30,11 @@ covid19_stan_data <- function(formula,
                               ecdf_time,
                               N0 = 6,
                               N2 = 90,
+                              formula_hiearchy = NULL,
                               verbose = TRUE){
   checkmate::assert_formula(formula)
   assert_daily_data(daily_data)
-
+  
   countries <- levels(daily_data$country)
 
   assert_country_data(country_data)
@@ -46,6 +47,12 @@ covid19_stan_data <- function(formula,
 
   checkmate::assert_int(N0, lower = 0)
   checkmate::assert_int(N2, lower = 5)
+  
+  if(!is.null(formula_hiearchy)){
+    checkmate::assert_formula(formula_hiearchy)
+    checkmate::assert_subset(attr(terms(formula_hiearchy),"term.labels"),
+                             attr(terms(formula),"term.labels"), empty.ok = TRUE)  
+  }
 
   ### Data munging
   row.names(country_data) <- country_data$country
@@ -59,6 +66,8 @@ covid19_stan_data <- function(formula,
 
   Xs <- covid_stan_covariate_data(formula, daily_data = d1, N2 = N2)
 
+  hiearchical <- identify_hiearchical_parameters(formula_hiearchy, Xs, verbose)
+  
   Ns <- dplyr::summarise(dplyr::group_by(d1, country), N = dplyr::n())
 
   f <- lapply(country_data[countries, "ifr"],
@@ -84,14 +93,16 @@ covid19_stan_data <- function(formula,
   sd$x <- 1:N2
   sd$P <- dim(Xs)[3]
   sd$X <- Xs
+  sd$hiearchical <- hiearchical
 
   if(length(sd$N) == 1) {
     sd$N = as.array(sd$N)
   }
 
+  assert_stan_data(sd)
+  
   sd
 }
-
 
 #' Extract design matrices compatible with current stan model
 #' @inheritParams covid19_stan_data
@@ -181,7 +192,7 @@ probability_of_death_given_infection <- function(ifr, ecdf_time, N2){
 assert_stan_data <- function(x){
   checkmate::assert_list(x)
   checkmate::assert_names(names(x),
-                          identical.to = c("M", "N", "deaths", "f", "N0", "cases", "SI", "EpidemicStart", "pop", "N2", "x", "P", "X"))
+                          must.include = c("M", "N", "deaths", "f", "N0", "cases", "SI", "EpidemicStart", "pop", "N2", "x", "P", "X"))
 
 }
 
@@ -256,5 +267,29 @@ assert_country_data <- function(x){
   checkmate::assert_names(colnames(x), must.include = c("country", "total_population", "ifr"))
   checkmate::assert_names(colnames(x), must.include = c("country", "total_population", "ifr"))
   checkmate::assert_false(any(duplicated(x)))
+}
+
+#' @rdname assert_stan_data
+identify_hiearchical_parameters <- function(formula_hiearchy, X, verbose = TRUE){
+  checkmate::assert_formula(formula_hiearchy, null.ok = TRUE)
+  checkmate::assert_array(X)
+  covariate_names <- dimnames(X)[[3]]
+  if(is.null(formula_hiearchy)){
+    bool <- rep(FALSE, length(covariate_names))
+    h <- as.integer(bool)
+    names(h) <- covariate_names
+    return(h)
+  }
+  
+  tl <- attr(terms(formula_hiearchy), "term.labels")
+  bool <- rep(FALSE, length(covariate_names))
+  for(i in seq_along(tl)){
+    bool <- bool | grepl(x = covariate_names, pattern = paste0("^", tl[i]))
+  }
+  if(verbose) message("The following parameters will have hiearchical priors:\n", paste0(covariate_names[bool], collapse = ",\n"))
+  
+  h <- as.integer(bool)
+  names(h) <- covariate_names
+  h
 }
 
