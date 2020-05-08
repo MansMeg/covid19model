@@ -1,0 +1,43 @@
+---
+title: "Google Mobility and Oxford SeverityIndex"
+author: "Måns Magnusson"
+date: '2020-05-03'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(covid19model)
+data(odv5g)
+odv5g <- odv5g[, c("country", "date", "StringencyIndex", "grocery_and_pharmacy", "retail_and_recreation", "parks", "transit_stations", "workplaces", "residential")]
+ggd <- tidyr::pivot_longer(odv5g, -(country:date), names_to = "type", values_to = "value")
+library(ggplot2)
+ggd$value[ggd$value>100] <- 100
+
+```
+
+## Summary / Take-Away
+
+- We can see that the effect on the mobility is related to the stringency of interventions. Although, less so than expected. The main effects seem to be in the weeks before the 15th of March, rather than correlated with the stringency.
+- It is also easy to see the effects of a total lockdown from the data. Countries like Sweden and Finland has an increased mobility in parks while in France it drops as well.
+- We see weekly seasonality in workplace, transit and residual mobility. This is probably an artifact from comparing with a baseline.
+
+
+## Description
+
+The data consists of mobility data from Google (mobility compared to baseline) and the Severity Index from the Oxford response data.
+
+
+## Figures
+
+```{r, fig.width=12, fig.height=4}
+countries <- levels(ggd$country)
+for (i in seq_along(countries)){
+  ggdplt <- ggd[ggd$country == countries[i], ]
+  ggdplt <- ggdplt[ggdplt$date >= as.Date("2020-02-15") & ggdplt$date <= as.Date("2020-04-26"), ]
+  plt <- ggplot(ggdplt, aes(x = date, y = value, color = type)) + geom_line() + ggtitle(countries[i]) + ylim(-100, 100) + theme_bw()
+  suppressWarnings(print(plt))
+}
+
+```
+

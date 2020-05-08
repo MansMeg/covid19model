@@ -1,0 +1,88 @@
+---
+title: "Report COVID19 Model"
+author: "Måns Magnusson"
+date: '2020-05-05'
+output: 
+  pdf_document: 
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(covid19imperial)
+library(ggplot2)
+library(bayesplot)
+m <- list()
+m[[1]] <- mget(load("../results/model4a_0430-stanfit.Rdata"))
+m[[2]] <- mget(load("../results/model5a_0430-stanfit.Rdata"))
+m[[3]] <- mget(load("../results/model5b_0430-stanfit.Rdata"))
+
+countries <- get_countries(m[[1]]$stan_data)
+
+```
+
+## Summary / Take Away
+
+- It is possible to include b-splines in the model.
+- It does not seem to give a lot of gains with using b-splines compare to linear effects.
+- Using splines for t is working well to capture the underlying change in Rt, although, this should be needed to be different for different countries.
+
+### Model descriptions
+
+- Model 1: Splines on t, the time point
+- Model 2: Linear neg_log_transit_proportion
+- Model 3: Splines on neg_log_transit_proportion
+
+## Covariate effects
+
+```{r, include=TRUE, fig.width=7, fig.height=3}
+plot_models <- 1:length(m)
+for(i in seq_along(plot_models)){
+  mod <- m[[plot_models[i]]]
+  p <- plot_covariate_size_effects(mod$fit, mod$stan_data) + ggtitle(paste0("Model", plot_models[i]))
+  suppressWarnings(print(p))
+}
+
+```
+
+
+
+## R0 for different countries
+
+```{r, include=TRUE, fig.width=7, fig.height=3}
+plot_models <- 1:length(m)
+for(i in seq_along(plot_models)){
+  mod <- m[[plot_models[i]]]
+  p <- plot_mu(mod$fit, mod$stan_data, countries) + ggtitle(paste0("Model", plot_models[i]))
+  print(p)
+}
+```
+
+
+## Infections, deaths and Rt by country and model
+
+```{r, include=TRUE, fig.width=12, fig.height=4}
+plot_models <- 1:length(m)
+countries <- get_countries(m[[1]]$stan_data)
+for(country in countries){
+  for(i in seq_along(plot_models)){
+    mod <- m[[plot_models[i]]]
+    p <- plot_three_panel(country = country, stan_fit = mod$fit, stan_data = mod$stan_data, daily_data = mod$daily_data, title = paste0(country, ": Model", plot_models[i]))
+    print(p)
+  }
+}
+
+```
+
+## Stan code
+
+```{r, include=TRUE, fig.width=12, fig.height=4}
+print(m[[1]]$fit@stanmodel)
+
+#plot_models <- 1:length(m)
+#for(i in seq_along(plot_models)){
+#  print(paste0(" ######## MODEL", i, " ######## "))
+#  print(m[[i]]$fit@stanmodel)
+#}
+
+```

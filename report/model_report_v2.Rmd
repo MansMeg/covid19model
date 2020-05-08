@@ -1,0 +1,119 @@
+---
+title: "Report COVID19 Model"
+author: "Måns Magnusson"
+date: '2020-05-05'
+output: 
+  pdf_document: 
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(covid19imperial)
+library(ggplot2)
+library(bayesplot)
+m <- list()
+m[[1]] <- mget(load("../results/model1_0430-stanfit.Rdata"))
+m[[2]] <- mget(load("../results/model1b_0430-stanfit.Rdata"))
+m[[3]] <- mget(load("../results/model6a_0430-stanfit.Rdata"))
+m[[4]] <- mget(load("../results/model5a_0430-stanfit.Rdata"))
+m[[5]] <- mget(load("../results/model5c_0430-stanfit.Rdata"))
+m[[6]] <- mget(load("../results/model6b_0430-stanfit.Rdata"))
+
+countries <- get_countries(m[[1]]$stan_data)
+
+```
+
+## Summary / Take Away
+
+- Using the increased number of covariates seem to be better, model-wise compared to baseline. I think in many istuations our models now perform better than Imperial College Londons baseline.
+- Mobility on transit station seem to be a good covariate to use. 
+- The regression coefficients are really sensitive. They need to be bounded for the model not to explode. 
+
+
+### Current flaws to be fixed:
+
+- IFR for Finland now set to IFR for Sweden
+
+
+### Potential ways forward:
+
+- Use hospitalizations instead of deaths. I think this has better quality and is more data.
+- Focus on Finland (and Sweden) at county level, although data may be missing.
+- Include serological studies to estimate cumulative infections, weekly.
+- Partial pooling of mobility variables.
+
+
+### Model descriptions
+
+- Model 1: The baseline model, without partial pooling of lockdown
+- Model 2: The baseline model, with partial pooling of lockdown variable
+- Model 3: Using Oxford Response data as indicator variables
+- Model 4: Google Mobility in transit stations 
+- Model 5: Google Mobility in transit stations and SeverityIndex 
+- Model 6: Google Mobility in transit stations and Oxford Binary data
+
+### Oxford covariate descriptions
+
+- C1: School closing
+- C2: Workplace closing
+- C3: Cancel public events
+- C4: Restrictions on Gatherings
+- C5: Close public transport
+- C6: Stay at home requirements
+- H2: Testing policy
+
+
+## Covariate effects
+
+```{r, include=TRUE, fig.width=7, fig.height=3}
+plot_models <- 1:length(m)
+for(i in seq_along(plot_models)){
+  mod <- m[[plot_models[i]]]
+  p <- plot_covariate_size_effects(mod$fit, mod$stan_data) + ggtitle(paste0("Model", plot_models[i]))
+  suppressWarnings(print(p))
+}
+
+```
+
+
+
+## R0 for different countries
+
+```{r, include=TRUE, fig.width=7, fig.height=3}
+plot_models <- 1:length(m)
+for(i in seq_along(plot_models)){
+  mod <- m[[plot_models[i]]]
+  p <- plot_mu(mod$fit, mod$stan_data, countries) + ggtitle(paste0("Model", plot_models[i]))
+  print(p)
+}
+```
+
+
+## Infections, deaths and Rt by country and model
+
+```{r, include=TRUE, fig.width=12, fig.height=4}
+plot_models <- 1:length(m)
+countries <- get_countries(m[[1]]$stan_data)
+for(country in countries){
+  for(i in seq_along(plot_models)){
+    mod <- m[[plot_models[i]]]
+    p <- plot_three_panel(country = country, stan_fit = mod$fit, stan_data = mod$stan_data, daily_data = mod$daily_data, title = paste0(country, ": Model", plot_models[i]))
+    print(p)
+  }
+}
+
+```
+
+## Stan code
+
+```{r, include=TRUE, fig.width=12, fig.height=4}
+print(m[[1]]$fit@stanmodel)
+
+#plot_models <- 1:length(m)
+#for(i in seq_along(plot_models)){
+#  print(paste0(" ######## MODEL", i, " ######## "))
+#  print(m[[i]]$fit@stanmodel)
+#}
+
+```
