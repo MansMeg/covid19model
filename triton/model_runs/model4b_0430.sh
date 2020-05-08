@@ -6,7 +6,7 @@ date
 
 git rev-parse --short HEAD
 
-export JOB_ID="model4c_0430"
+export JOB_ID="model4b_0430"
 
 module load r/3.6.1-python3
 
