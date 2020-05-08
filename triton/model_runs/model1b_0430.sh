@@ -6,7 +6,7 @@ date
 
 git rev-parse --short HEAD
 
-export JOB_ID="model1a_0430"
+export JOB_ID="model1b_0430"
 
 module load r/3.6.1-python3
 
@@ -16,7 +16,7 @@ cat > $JOB_ID.yml <<EOF
 job_id: "$JOB_ID"
 
 model_arguments:
-  stan_model: "base_general.stan"
+  stan_model: "base.stan"
   model_formula: "~ schools...universities + self.isolating.if.ill + public.events + any.intervention + lockdown + social.distancing.encouraged"
   N2: 110
   seed: 4711
