@@ -30,7 +30,7 @@ covid19_stan_data <- function(formula,
                               ecdf_time,
                               N0 = 6,
                               N2 = 90,
-                              formula_hiearchy = NULL,
+                              formula_hiearchical = NULL,
                               verbose = TRUE){
   checkmate::assert_formula(formula)
   assert_daily_data(daily_data)
@@ -48,9 +48,9 @@ covid19_stan_data <- function(formula,
   checkmate::assert_int(N0, lower = 0)
   checkmate::assert_int(N2, lower = 5)
   
-  if(!is.null(formula_hiearchy)){
-    checkmate::assert_formula(formula_hiearchy)
-    checkmate::assert_subset(attr(terms(formula_hiearchy),"term.labels"),
+  if(!is.null(formula_hiearchical)){
+    checkmate::assert_formula(formula_hiearchical)
+    checkmate::assert_subset(attr(terms(formula_hiearchical),"term.labels"),
                              attr(terms(formula),"term.labels"), empty.ok = TRUE)  
   }
 
@@ -66,7 +66,7 @@ covid19_stan_data <- function(formula,
 
   Xs <- covid_stan_covariate_data(formula, daily_data = d1, N2 = N2)
 
-  hiearchical <- identify_hiearchical_parameters(formula_hiearchy, Xs, verbose)
+  hiearchical <- identify_hiearchical_parameters(formula_hiearchical, Xs, verbose)
   
   Ns <- dplyr::summarise(dplyr::group_by(d1, country), N = dplyr::n())
 
@@ -269,27 +269,33 @@ assert_country_data <- function(x){
   checkmate::assert_false(any(duplicated(x)))
 }
 
-#' @rdname assert_stan_data
-identify_hiearchical_parameters <- function(formula_hiearchy, X, verbose = TRUE){
-  checkmate::assert_formula(formula_hiearchy, null.ok = TRUE)
+#' @rdname covid19_stan_data
+#' @export
+identify_hiearchical_parameters <- function(formula_hiearchical, X, verbose = TRUE){
+  checkmate::assert_formula(formula_hiearchical, null.ok = TRUE)
   checkmate::assert_array(X)
   covariate_names <- dimnames(X)[[3]]
-  if(is.null(formula_hiearchy)){
-    bool <- rep(FALSE, length(covariate_names))
-    h <- as.integer(bool)
-    names(h) <- covariate_names
-    return(h)
+  
+  # Function to convert to integer array
+  out <- function(x, cn){
+    x <- as.integer(x)
+    names(x) <- cn
+    as.array(x)
   }
   
-  tl <- attr(terms(formula_hiearchy), "term.labels")
+  if(is.null(formula_hiearchical)){
+    bool <- rep(FALSE, length(covariate_names))
+    return(out(bool, covariate_names))
+  }
+  
+  tl <- attr(terms(formula_hiearchical), "term.labels")
   bool <- rep(FALSE, length(covariate_names))
   for(i in seq_along(tl)){
     bool <- bool | grepl(x = covariate_names, pattern = paste0("^", tl[i]))
   }
   if(verbose) message("The following parameters will have hiearchical priors:\n", paste0(covariate_names[bool], collapse = ",\n"))
   
-  h <- as.integer(bool)
-  names(h) <- covariate_names
-  h
+  out(bool, covariate_names)
+
 }
 

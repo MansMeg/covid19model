@@ -5,6 +5,7 @@
 \alias{get_reported_cases}
 \alias{get_deaths}
 \alias{get_countries}
+\alias{identify_hiearchical_parameters}
 \title{Create input data to the COVID19 Stan model}
 \usage{
 covid19_stan_data(
@@ -15,7 +16,7 @@ covid19_stan_data(
   ecdf_time,
   N0 = 6,
   N2 = 90,
-  formula_hiearchy = NULL,
+  formula_hiearchical = NULL,
   verbose = TRUE
 )
 
@@ -24,6 +25,8 @@ get_reported_cases(daily_data)
 get_deaths(daily_data)
 
 get_countries(stan_data)
+
+identify_hiearchical_parameters(formula_hiearchical, X, verbose = TRUE)
 }
 \arguments{
 \item{formula}{a R formula for the effect of covariates in [daily_data] on Rt}

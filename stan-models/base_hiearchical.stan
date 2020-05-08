@@ -6,6 +6,7 @@ data {
   int<lower=1> N2; // days of observed data + # of days to forecast
   int cases[N2,M]; // reported cases
   int deaths[N2, M]; // reported deaths -- the rows with i > N contain -1 and should be ignored
+  int<lower=0, upper=1> hiearchical[P]; // indicator of hiearchical covariates
   matrix[N2, M] f; // h * s
   matrix[N2, P] X[M];
   int EpidemicStart[M];
@@ -30,7 +31,9 @@ transformed data {
 
 parameters {
   real<lower=0> mu[M]; // intercept for Rt
-  real<lower=0> alpha_hier[P]; // sudo parameter for the hier term for alpha
+  real<lower=0> alpha_mu[P]; // global alpha mus
+  real<lower=0> alpha_sigma[P]; // global alpha sigmas
+  matrix<lower=0>[P,M] alpha_raw;
   real<lower=0> kappa;
   real<lower=0> y[M];
   real<lower=0> phi;
@@ -39,17 +42,23 @@ parameters {
 }
 
 transformed parameters {
-    vector[P] alpha;
+    matrix<lower=0>[P,M] alpha;
     matrix[N2, M] prediction = rep_matrix(0,N2,M);
     matrix[N2, M] E_deaths  = rep_matrix(0,N2,M);
     matrix[N2, M] Rt = rep_matrix(0,N2,M);
     matrix[N2, M] Rt_adj = Rt;
     
+    for(p in 1:P){
+      if(hiearchical[p] == 1){
+        alpha[p,] = alpha_raw[p,]*alpha_sigma[p] + alpha_mu[p];
+      } else {
+        alpha[p,] = alpha_raw[p,];
+      }
+    }
+    
+    
     {
       matrix[N2,M] cumm_sum = rep_matrix(0,N2,M);
-      for(i in 1:P){
-        alpha[i] = alpha_hier[i] - ( log(1.05) / 6.0 );
-      }
       for (m in 1:M){
         /*
         for (i in 2:N0){
@@ -59,7 +68,7 @@ transformed parameters {
         prediction[1:N0,m] = rep_vector(y[m],N0); // learn the number of cases in the first N0 days
         cumm_sum[2:N0,m] = cumulative_sum(prediction[2:N0,m]);
         
-        Rt[,m] = mu[m] * exp(-X[m] * alpha);
+        Rt[,m] = mu[m] * exp(-X[m] * alpha[,m]);
           Rt_adj[1:N0,m] = Rt[1:N0,m];
         for (i in (N0+1):N2) {
           /*
@@ -93,7 +102,11 @@ model {
   phi ~ normal(0,5);
   kappa ~ normal(0,0.5);
   mu ~ normal(3.28, kappa); // citation: https://academic.oup.com/jtm/article/27/2/taaa021/5735319
-  alpha_hier ~ gamma(.1667,1);
+  alpha_mu ~ normal(0,1);
+  alpha_sigma ~ normal(0,1);
+  for(p in 1:P){
+    alpha_raw[p,] ~ normal(0,1);
+  }
   ifr_noise ~ normal(1,0.1);
   for(m in 1:M){
     deaths[EpidemicStart[m]:N[m], m] ~ neg_binomial_2(E_deaths[EpidemicStart[m]:N[m], m], phi);
