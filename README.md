@@ -1,5 +1,16 @@
 ![](https://github.com/ImperialCollegeLondon/covid19model/workflows/CI/badge.svg)
 
+# Improved Aalto models
+
+To run a model using the improved Aalto model together first install the R package from bash as:
+```
+Rscript -e "remotes::install_local('rpackage', force = TRUE)"
+```
+
+Then examples of bash scripts to setup models and run them can be found in `triton/model_runs/`. The script spits out an R object with stanfit, data and the config used in the results folder. Use `load()` in R to read in the results. 
+
+
+
 # covid19model
 Code for modelling estimated deaths and cases for COVID19 from Report 13 published by MRC Centre for Global Infectious Disease Analysis, Imperial College London: [Estimating the number of infections and the impact of nonpharmaceutical interventions on COVID-19 in 11 European countries](https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/covid-19/report-13-europe-npi-impact/) 
 
