@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=0-12:00:00
+#SBATCH --time=0-04:00:00
 #SBATCH --cpus-per-task=4
 
 date
@@ -32,8 +32,8 @@ data:
   daily_data: "odv5g"
 
 stan_arguments:
-  iter: 2500
-  warmup: 2000
+  iter: 1500
+  warmup: 1000
   chains: 4
   thin: 1
   control:
