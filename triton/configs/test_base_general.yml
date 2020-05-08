@@ -1,11 +1,11 @@
 
-job_id: "model5a_0430"
+job_id: "test_base_general"
 
 libraries:
   - splines
 
 model_arguments:
-  stan_model: "base_general_speed.stan"
+  stan_model: "base_general.stan"
   model_formula: "~ neg_log_transit_proportion"
   N2: 110
   seed: 4711

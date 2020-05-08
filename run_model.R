@@ -34,7 +34,7 @@ if(DEBUG) {
 # Read in config
 cfg_path <- cmdoptions$args[1]
 # cfg_path <- "triton/configs/test_model.yml"
-# cfg_path <- "triton/configs/model5a_0430.yml"
+# cfg_path <- "triton/configs/test_base_general.yml"
 cfg <- yaml::read_yaml(cfg_path)
 cat(yaml::as.yaml(cfg))
 
