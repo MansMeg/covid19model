@@ -29,10 +29,10 @@ data:
   daily_data: "icv3"
 
 stan_arguments:
-  iter: 2500
+  iter: 3000
   warmup: 2000
   chains: 4
-  thin: 1
+  thin: 2
   control:
     adapt_delta: 0.99
     max_treedepth: 15
