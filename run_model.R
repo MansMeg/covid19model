@@ -1,12 +1,6 @@
 library(rstan)
-library(data.table)
-library(lubridate)
-library(gdata)
-library(dplyr)
-library(tidyr)
-library(EnvStats)
-library(magrittr)
-library(optparse)
+suppressPackageStartupMessages(library(EnvStats))
+suppressPackageStartupMessages(library(optparse))
 # remotes::install_local("rpackage", force = TRUE)
 library(covid19model)
 
@@ -20,6 +14,7 @@ cmdoptions <- parse_args(parser, args = commandArgs(trailingOnly = TRUE), positi
 
 # Default run parameters for the model
 if(is.null(cmdoptions$options$debug)) {
+  # Sys.setenv(DEBUG = "TRUE")
   DEBUG = Sys.getenv("DEBUG") == "TRUE"
 } else {
   DEBUG = cmdoptions$options$debug
@@ -125,6 +120,8 @@ print(sprintf("Jobid = %s",JOBID))
 
 runtime <-  list(start = start_time,
                  end = Sys.time())
+cat("Run time:\n")
+print(runtime$end - runtime$start)
 
 save(fit, stan_data, daily_data, country_data, cfg, runtime, file=paste0('results/', JOBID, '-stanfit.Rdata'))
 
