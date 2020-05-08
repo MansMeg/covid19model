@@ -10,6 +10,7 @@ library(optparse)
 # remotes::install_local("rpackage", force = TRUE)
 library(covid19model)
 
+start_time <- Sys.time()
 
 # Commandline options and parsing
 parser <- OptionParser()
@@ -85,13 +86,13 @@ ecdf.saved = ecdf(x1+x2)
 
 # Note that the Stan model already includes an intercept
 formula_from_cfg <- eval(parse(text = cfg$model_arguments$model_formula))
-if(!is.null(cfg$model_arguments$model_formula_hiearchy)){
-  formula_hiearchy_from_cfg <- eval(parse(text = cfg$model_arguments$model_formula_hiearchy))
+if(!is.null(cfg$model_arguments$model_formula_hiearchical)){
+  formula_hiearchical_from_cfg <- eval(parse(text = cfg$model_arguments$model_formula_hiearchical))
 } else {
-  formula_hiearchy_from_cfg <- NULL
+  formula_hiearchical_from_cfg <- NULL
 }
 stan_data <- covid19_stan_data(formula = formula_from_cfg,
-                               formula_hiearchy = formula_hiearchy_from_cfg,
+                               formula_hiearchical = formula_hiearchical_from_cfg,
                                daily_data = daily_data,
                                country_data = country_data,
                                serial_interval = serial_interval,
@@ -122,6 +123,8 @@ if(JOBID == "")
 print(sprintf("Jobid = %s",JOBID))
 
 
+runtime <-  list(start = start_time,
+                 end = Sys.time())
 
-save(fit, stan_data, daily_data, country_data, cfg, file=paste0('results/', JOBID, '-stanfit.Rdata'))
+save(fit, stan_data, daily_data, country_data, cfg, runtime, file=paste0('results/', JOBID, '-stanfit.Rdata'))
 
