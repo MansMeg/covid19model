@@ -73,8 +73,8 @@ set.seed(cfg$model_arguments$seed)
 # various distributions required for modeling
 mean1 = 5.1; cv1 = 0.86; # infection to onset
 mean2 = 18.8; cv2 = 0.45 # onset to death
-x1 = rgammaAlt(1e7,mean1,cv1) # infection-to-onset distribution
-x2 = rgammaAlt(1e7,mean2,cv2) # onset-to-death distribution
+x1 = EnvStats::rgammaAlt(1e7,mean1,cv1) # infection-to-onset distribution
+x2 = EnvStats::rgammaAlt(1e7,mean2,cv2) # onset-to-death distribution
 
 ecdf.saved = ecdf(x1+x2)
 
@@ -97,8 +97,8 @@ stan_data <- covid19_stan_data(formula = formula_from_cfg,
 
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
-StanModel <- cfg$model_arguments$stan_model
-m = stan_model(paste0('stan-models/',StanModel))
+m = stan_model(paste0('stan-models/',
+                      cfg$model_arguments$stan_model))
 
 
 if(DEBUG) {
@@ -116,7 +116,6 @@ JOBID = cfg$job_id
 if(JOBID == "")
   JOBID = as.character(abs(round(rnorm(1) * 1000000)))
 print(sprintf("Jobid = %s",JOBID))
-
 
 runtime <-  list(start = start_time,
                  end = Sys.time())
