@@ -122,5 +122,7 @@ runtime <-  list(start = start_time,
 cat("Run time:\n")
 print(runtime$end - runtime$start)
 
-save(fit, stan_data, daily_data, country_data, cfg, runtime, file=paste0('results/', JOBID, '-stanfit.Rdata'))
+git_sha <- try(system("git rev-parse HEAD", intern=TRUE))
+
+save(fit, stan_data, daily_data, country_data, cfg, runtime, git_sha, file=paste0('results/', JOBID, '-stanfit.Rdata'))
 
