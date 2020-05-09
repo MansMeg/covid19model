@@ -12,14 +12,37 @@ plot_covariate_size_effects <- function(stan_fit, stan_data){
   assert_stan_data(stan_data)
   
   out <- rstan::extract(stan_fit)
+  stopifnot(length(dim(out$alpha)) == 2)
   alpha <- data.frame(as.matrix(out$alpha))
   colnames(alpha) = dimnames(stan_data$X)[[3]]
+  plot_covariate_size_effects_from_alpha(alpha)
+}
+
+#' @rdname plot_covariate_size_effects
+#' @export
+plot_covariate_size_effects_country <- function(country, stan_fit, stan_data){
+  checkmate::assert_class(stan_fit, "stanfit")
+  checkmate::assert_true(any(grepl(names(stan_fit), pattern = "^alpha")))
+  assert_stan_data(stan_data)
+  checkmate::assert_choice(country, get_countries(stan_data))
+  
+  out <- rstan::extract(stan_fit)
+  stopifnot(length(dim(out$alpha)) == 3)
+  
+  cidx <- which(get_countries(stan_data) == country)
+  alpha <- data.frame(as.matrix(out$alpha[,,cidx]))
+  colnames(alpha) = dimnames(stan_data$X)[[3]]
+  xx <- plot_covariate_size_effects_from_alpha(alpha)
+}
+
+plot_covariate_size_effects_from_alpha <- function(alpha){
+  checkmate::assert_data_frame(alpha)
   
   data <- suppressWarnings(
     bayesplot::mcmc_intervals_data(alpha,  
-                                  prob = .95,
-                                  transformation = function(x) 1-exp(-x),
-                                  point_est = "mean")
+                                   prob = .95,
+                                   transformation = function(x) 1-exp(-x),
+                                   point_est = "mean")
   )
   
   levels(data$parameter) = gsub("t(", "", levels(data$parameter), fixed=TRUE)
@@ -32,7 +55,7 @@ plot_covariate_size_effects <- function(stan_fit, stan_data){
   x_lim[1] <- x_lim[1] - 0.05 * x_range
   x_lim[2] <- x_lim[2] + 0.05 * x_range
   layer_vertical_line <- if (0 > x_lim[1] && 0 < x_lim[2]) {
-    vline_0(color = "gray90", size = 0.5)
+    bayesplot::vline_0(color = "gray90", size = 0.5)
   } else {
     geom_blank(
       mapping = NULL, data = NULL,
@@ -66,9 +89,10 @@ plot_covariate_size_effects <- function(stan_fit, stan_data){
     geom_vline(xintercept=1,colour="darkgray") +
     scale_y_discrete("Governmental intervention\n") +
     theme(plot.margin = margin(0, 2, 0, .5, "cm"))
-
+  
   p
 }
+
 
 
 #' @rdname plot_covariate_size_effects

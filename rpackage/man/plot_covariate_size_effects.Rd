@@ -2,10 +2,13 @@
 % Please edit documentation in R/plot_covariate_size_effects.R
 \name{plot_covariate_size_effects}
 \alias{plot_covariate_size_effects}
+\alias{plot_covariate_size_effects_country}
 \alias{plot_covariate_size_effects_from_file}
 \title{Plot covariate size effects}
 \usage{
 plot_covariate_size_effects(stan_fit, stan_data)
+
+plot_covariate_size_effects_country(country, stan_fit, stan_data)
 
 plot_covariate_size_effects_from_file(file_path)
 }
