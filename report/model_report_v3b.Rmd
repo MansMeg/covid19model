@@ -1,0 +1,164 @@
+---
+title: "Report: COVID19 Bayesian Epidemiological Model"
+author: "Måns Magnusson"
+date: '2020-05-11'
+output: 
+  pdf_document: 
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(covid19model)
+library(ggplot2)
+library(bayesplot)
+m <- list()
+m[[1]] <- mget(load("../results/model1b_0430-stanfit.Rdata"))
+m[[2]] <- mget(load("../results/model2b_0430-stanfit.Rdata"))
+m[[3]] <- mget(load("../results/model4b_0430-stanfit.Rdata"))
+m[[4]] <- mget(load("../results/model3b_0430-stanfit.Rdata"))
+m[[5]] <- mget(load("../results/model7b_0430-stanfit.Rdata"))
+
+countries <- get_countries(m[[1]]$stan_data)
+case_countries <- c("Finland", "Sweden", "Italy")
+noncase_countries <- countries[!countries %in% case_countries]
+```
+
+### Model descriptions
+
+- Model 1: The Imperial College model v3, with partial pooling of lockdown variable
+- Model 2: Google Mobility and Oxford Binary Intervention indicators. Regression coefficients are assumed common for all countries (pooled alpha).
+- Model 3: Google Mobility and Oxford Binary Intervention indicators. Regression coefficients are hierarchical and inform each other between countries. (hierarchical alpha)
+- Model 4: Google Mobility and Oxford Binary Intervention indicators. Regression coefficients are estimated for each country. (local alpha)
+- Model 5: Google Mobility, Oxford Binary Intervention indicators and b-spline. Regression coefficients are hierarchical and the b-spline is a local spline over t per country.
+
+### Oxford covariate descriptions
+
+- C1: School closing
+- C2: Workplace closing
+- C3: Cancel public events
+- C4: Restrictions on Gatherings
+- C5: Close public transport
+- C6: Stay at home requirements
+- H2: Testing policy
+
+# Case study: The Sweden, Finland and Italy
+
+All other countries are included in the Appendix.
+
+## Global covariate effects (model 1 and 2)
+
+```{r, include=TRUE, fig.width=7, fig.height=3}
+plot_models <- 1:2
+
+for(i in seq_along(plot_models)){
+  mod <- m[[plot_models[i]]]
+  p <- plot_covariate_size_effects(mod$fit, mod$stan_data) + ggtitle(paste0("Model", plot_models[i]))
+  suppressWarnings(print(p))
+}
+
+```
+
+
+## Country specific effects (model 3 and 4)
+
+We see that the hierarchical model has an easier time to capture the general effect that mobility has a larger effect than the stringency index. Hence the actual mobility affects $R_t$ more than the interventions.
+
+```{r, include=TRUE, fig.width=7, fig.height=3}
+plot_models <- 3:4
+
+for(country in case_countries){
+  for(i in seq_along(plot_models)){
+    mod <- m[[plot_models[i]]]
+    p <- plot_covariate_size_effects_country(country, mod$fit, mod$stan_data) + ggtitle(paste0(country, ", Model", plot_models[i]))
+    suppressWarnings(print(p))
+  }
+}
+
+
+```
+
+
+## R0 for different countries
+
+We can see that the different values for R0 vary much more between the countries when we use models with common regression coefficients.
+
+```{r, include=TRUE, fig.width=7, fig.height=3}
+plot_models <- 1:length(m)
+for(i in seq_along(plot_models)){
+  mod <- m[[plot_models[i]]]
+  p <- plot_mu(mod$fit, mod$stan_data, countries) + ggtitle(paste0("Model", plot_models[i]))
+  print(p)
+}
+```
+
+
+
+## Infections, cases, deaths and Rt by country and model
+
+```{r, include=TRUE, fig.width=12, fig.height=4}
+plot_models <- 1:length(m)
+for(country in case_countries){
+  for(i in seq_along(plot_models)){
+    mod <- m[[plot_models[i]]]
+    p <- plot_three_panel(country = country, stan_fit = mod$fit, stan_data = mod$stan_data, daily_data = mod$daily_data, title = paste0(country, ": Model", plot_models[i]))
+    print(p)
+  }
+}
+
+
+
+```
+
+## Stan code
+
+```{r, include=TRUE, fig.width=12, fig.height=4}
+print(m[[1]]$fit@stanmodel)
+
+#plot_models <- 1:length(m)
+#for(i in seq_along(plot_models)){
+#  print(paste0(" ######## MODEL", i, " ######## "))
+#  print(m[[i]]$fit@stanmodel)
+#}
+
+```
+
+
+# Appendix
+
+## Country specific effects (model 3 to 4)
+
+```{r, include=TRUE, fig.width=7, fig.height=3}
+plot_models <- 3:4
+
+for(country in noncase_countries){
+  for(i in seq_along(plot_models)){
+    mod <- m[[plot_models[i]]]
+    p <- plot_covariate_size_effects_country(country, mod$fit, mod$stan_data) + ggtitle(paste0(country, ", Model", plot_models[i]))
+    suppressWarnings(print(p))
+  }
+}
+
+```
+
+
+## Infections, cases, deaths and Rt by country and model
+
+```{r, include=TRUE, fig.width=12, fig.height=4}
+plot_models <- 1:length(m)
+for(country in noncase_countries){
+  for(i in seq_along(plot_models)){
+    mod <- m[[plot_models[i]]]
+    p <- plot_three_panel(country = country, stan_fit = mod$fit, stan_data = mod$stan_data, daily_data = mod$daily_data, title = paste0(country, ": Model", plot_models[i]))
+    print(p)
+  }
+}
+
+```
+
+### Reproducibility
+
+Report git hash: 
+```{r, include=TRUE, fig.width=12, fig.height=4}
+cat(system("git rev-parse HEAD", intern=TRUE))
+```
