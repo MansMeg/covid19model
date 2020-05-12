@@ -22,7 +22,7 @@ model_arguments:
   stan_model: "base_general1b.stan"
   model_formula: "~ neg_log_transit_proportion + StringencyIndex"
   N2: 110
-  seed: 4711
+  seed: 4712
   date:
     start: "2020-01-01"
     end: "2020-04-30"
@@ -37,7 +37,7 @@ stan_arguments:
   chains: 4
   thin: 2
   control:
-    adapt_delta: 0.99
+    adapt_delta: 0.995
     max_treedepth: 12
 
 EOF
