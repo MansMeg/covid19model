@@ -18,6 +18,7 @@ m[[2]] <- mget(load("../results/model2d_0430-stanfit.Rdata"))
 m[[3]] <- mget(load("../results/model4d_0430-stanfit.Rdata"))
 m[[4]] <- mget(load("../results/model3d_0430-stanfit.Rdata"))
 m[[5]] <- mget(load("../results/model7d_0430-stanfit.Rdata"))
+m[[6]] <- mget(load("../results/model8d_0430-stanfit.Rdata"))
 
 countries <- get_countries(m[[1]]$stan_data)
 case_countries <- c("Finland", "Sweden", "Italy")
@@ -56,6 +57,7 @@ noncase_countries <- countries[!countries %in% case_countries]
 - Model 3: Google Mobility and Stringency Index. Regression coefficients are hierarchical and inform each other between countries. (hierarchical alpha)
 - Model 4: Google Mobility and Stringency Index. Regression coefficients are estimated for each country. (local alpha)
 - Model 5: Google Mobility and Stringency Index and b-spline. Regression coefficients are hierarchical and the b-spline is a local spline over t per country.
+- Model 6: As model 3, but with phi estimated individually for each country
 
 ### Oxford covariate descriptions
 
