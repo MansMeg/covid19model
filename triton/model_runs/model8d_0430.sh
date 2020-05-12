@@ -20,7 +20,7 @@ libraries:
 
 model_arguments:
   stan_model: "base_hiearchical1b.stan"
-  model_formula: "~ neg_log_transit_proportion + StringencyIndex + bs(t, df = 5, degree = 3)"
+  model_formula: "~ neg_log_transit_proportion + StringencyIndex"
   model_formula_hiearchical: "~ neg_log_transit_proportion + StringencyIndex"
   N2: 110
   seed: 4711
