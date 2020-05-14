@@ -1,18 +1,21 @@
 ## code to prepare `DATASET` dataset goes here
-library(covidresponser)
 library(covid19model)
 countries <- c("DNK", "ITA", "DEU", "ESP", "GBR", "FRA", "NOR", "BEL", "AUT", "SWE", "CHE", "GRC", "PRT", "NLD", "FIN")
 
-odv5raw <- covidresponser::covidtracker_csv_v5(countries, FALSE)
+odv5raw <- covidtracker_csv_v5(countries, TRUE)
 stopifnot(!any(duplicated(odv5raw)))
 full_names <- names(odv5raw)
 
 # Store raw data
-usethis::use_data(odv5raw, version = 2, overwrite = TRUE)
-# data(odv5raw)
+dn <- paste0("odv5raw_", substr(gsub(Sys.Date(), pattern = "-", replacement = ""), 5, 8))
+assign(dn, value = odv5raw)
+eval(parse(text = paste0("usethis::use_data(", dn, ", version = 2, overwrite = TRUE)")))
+
+# data("odv5raw_0514")
+
 odv5 <- odv5raw
 
-date_max <- as.Date("2020-05-01")
+date_max <- as.Date("2020-05-10")
 
 # Clean variable names
 ig <- stringr::str_detect(names(odv5), pattern = "Flag")
@@ -38,8 +41,8 @@ for(i in seq_along(var_nms)){
 odv5$C4[odv5$CountryName == "Portugal" & odv5$Date == "2020-01-01"] <- "No measures"
 odv5$C4[odv5$CountryName == "Portugal" & odv5$Date == "2020-03-19"] <- "< 10 people"
 odv5$C6[odv5$CountryName == "Portugal" & odv5$Date == "2020-01-01"] <- "No measures"
-odv5$C6[odv5$CountryName == "Portugal" & odv5$Date == "2020-03-19"] <- "Require not leaving house (minimal exceptions)"
-odv5$C7[odv5$CountryName == "Portugal" & odv5$Date == "2020-04-17"] <- "Restrict movement"
+odv5$C7[odv5$CountryName == "Portugal" & odv5$Date %in% seq.Date(as.Date("2020-04-09"), as.Date("2020-04-13"), by = 1)] <- "Recommend movement restriction"
+odv5$C7[odv5$CountryName == "Portugal" & odv5$Date %in% seq.Date(as.Date("2020-05-01"), as.Date("2020-05-03"), by = 1)] <- "Recommend movement restriction"
 
 # Greece has NAs when no measures should exist
 odv5$C4[odv5$CountryName == "Greece" & odv5$Date == "2020-01-01"] <- "No measures"
@@ -64,7 +67,32 @@ odv5 <- dplyr::group_by(odv5, CountryCode)
 odv5 <- tidyr::fill(odv5, C1, C2, C3, C4, C5, C6, C7, C8, H1, H2, H3)
 odv5 <- tidyr::fill(odv5, StringencyIndex)
 
-ecdc <- readRDS('../data/COVID-19-up-to-date.rds')
+
+
+# Variables currently not in use
+odv5 <- tidyr::fill(odv5,
+#                   C1.Flag, C2.Flag, C3.Flag, C4.Flag, C5.Flag, C6.Flag, C7.Flag, E1.Flag, H1.Flag,
+                    E1, E2, E3, E4,
+                    H3, H4, H5,
+                    .direction = "downup")
+
+# Remove variables not in use due to large number of missing values
+odv5$M1 <- NULL
+odv5$E4 <- NULL
+
+# Remove flag variables
+flag_idx <- grepl(colnames(odv5), pattern = "Flag")
+odv5 <- odv5[, !flag_idx]
+
+odv5 <- tidyr::fill(odv5,
+                    ConfirmedCases, ConfirmedDeaths, StringencyIndexForDisplay, LegacyStringencyIndex, LegacyStringencyIndexForDisplay,
+                    .direction = "down")
+# Additional NA is 0 in the beginning of the series
+odv5$ConfirmedCases[is.na(odv5$ConfirmedCases)] <- 0
+odv5$ConfirmedDeaths[is.na(odv5$ConfirmedDeaths)] <- 0
+
+
+ecdc <- get_ecdc_data()
 ecdc$date <- lubridate::dmy(ecdc$DateRep)
 
 odv5$CountryName[odv5$CountryName == "United Kingdom"] <- "United_Kingdom"
@@ -77,14 +105,21 @@ colnames(odv5)[colnames(odv5) == "Date"] <- "date"
 colnames(odv5)[colnames(odv5) == "Cases"] <- "cases"
 colnames(odv5)[colnames(odv5) == "Deaths"] <- "deaths"
 
+# Set missing values in cases and deaths previous days value
+odv5 <- tidyr::fill(odv5,
+                    cases, deaths,
+                    .direction = "down")
+# Additional NA is 0 in the beginning of the series
+odv5$cases[is.na(odv5$cases)] <- 0
+odv5$deaths[is.na(odv5$deaths)] <- 0
+
+
 # Remove later dates
 odv5 <- odv5[odv5$date <= date_max,]
 
 # Cleanup
 odv5$country <- as.factor(odv5$country)
 
-#C7: If flag is partial -> recommend movement restrictions
-#H2: General testing or nothing
 
 # Model specific variables
 # data("odv5")
@@ -113,25 +148,23 @@ odv5$H2b <- odv5$H2
 levels(odv5$H2b) <- list("Limited Testing"=c("No testing policy", "Only testing those who both (a) have symptoms, and (b) meet specific criteria"),
                          "Extensive Testing"=c("Testing of anyone showing COVID19 symptoms", "Open public testing"))
 
+# Check country
+if(FALSE){
+  to_check <- odv5[odv5$country == "Portugal" & lubridate::month(odv5$date) >= 2, c("date", "C6")]
+}
+
 assert_daily_data(odv5)
 check_daily_data(x = odv5)
-usethis::use_data(odv5, version = 2, overwrite = TRUE)
+# Belgium and Switzerland in H2/H2b is correct
+
+# Store data
+dn <- paste0("odv5_", substr(gsub(Sys.Date(), pattern = "-", replacement = ""), 5, 8))
+assign(dn, value = odv5)
+eval(parse(text = paste0("usethis::use_data(", dn, ", version = 2, overwrite = TRUE)")))
+
 
 # Add google mobility data
-google_file <- "https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv"
-tmpf <- tempfile()
-download.file(google_file,destfile = tmpf)
-g <- read.csv(tmpf, stringsAsFactors = FALSE)
-g <- g[!is.na(g$country_region),]
-g$date <- as.Date(g$date)
-g$country_region[g$country_region == "United Kingdom"] <- "United_Kingdom"
-
-g <- g[g$country_region %in% levels(odv5$country),]
-g <- g[g$sub_region_1 == "",]
-g <- g[g$sub_region_2 == "",]
-names(g) <- stringr::str_replace_all(names(g), pattern = "_percent_change_from_baseline", replacement = "")
-g$sub_region_1 <- NULL
-g$sub_region_2 <- NULL
+g <- get_data_google_mobility()
 
 odv5$country <- as.character(odv5$country)
 odv5g <- dplyr::left_join(odv5, g,
@@ -156,8 +189,18 @@ odv5g$StringencyIndex <- odv5g$StringencyIndex / 100
 odv5g$StringencyIndexForDisplay <- odv5g$StringencyIndexForDisplay / 100
 
 assert_daily_data(odv5g)
-usethis::use_data(odv5g, version = 2, overwrite = TRUE)
 
+
+# Store data
+dn <- paste0("odv5g_", substr(gsub(Sys.Date(), pattern = "-", replacement = ""), 5, 8))
+assign(dn, value = odv5g)
+eval(parse(text = paste0("usethis::use_data(", dn, ", version = 2, overwrite = TRUE)")))
+
+
+
+
+
+## Additional visual inspection -----
 
 if(FALSE){
   # Visual inspection

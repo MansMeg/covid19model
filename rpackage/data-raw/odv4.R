@@ -1,6 +1,5 @@
 ## code to prepare `DATASET` dataset goes here
 library(covid19model)
-library(covidresponser)
 countries <- c("DNK", "ITA", "DEU", "ESP", "GBR", "FRA", "NOR", "BEL", "AUT", "SWE", "CHE", "GRC", "PRT", "NLD", "FIN")
 
 od <- covidresponser::covidtracker_csv(countries, TRUE)

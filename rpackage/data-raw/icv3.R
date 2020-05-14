@@ -19,7 +19,7 @@ countries <- c(
 )
 
 ## Reading all data
-d <- readRDS('../data/COVID-19-up-to-date.rds')
+d <- get_ecdc_data()
 d$date <- lubridate::dmy(d$DateRep)
 
 covariates <- read.csv('../data/interventions.csv', stringsAsFactors = FALSE)
@@ -48,5 +48,8 @@ icv3 <- covariates_df
 
 assert_daily_data(icv3)
 
-usethis::use_data(icv3, version = 2, overwrite = TRUE)
+dn <- paste0("icv3_", substr(gsub(Sys.Date(), pattern = "-", replacement = ""), 5, 8))
+assign(dn, value = icv3)
+eval(parse(text = paste0("usethis::use_data(", dn, ", version = 2, overwrite = TRUE)")))
+
 
