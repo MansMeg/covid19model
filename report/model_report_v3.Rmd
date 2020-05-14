@@ -42,6 +42,7 @@ noncase_countries <- countries[!countries %in% case_countries]
 
 - The infection to fatality ratio (IFR) for Finland now set to the IFR for Sweden.
 
+
 ### Potential ways forward
 
 - Introduce a dynamic component in the effect of Rt to smooth out the development over time. 
