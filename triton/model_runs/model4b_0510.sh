@@ -6,7 +6,7 @@ date
 
 git rev-parse --short HEAD
 
-export JOB_ID="model2b_0510"
+export JOB_ID="model4b_0510"
 
 module load r/3.6.1-python3
 
@@ -19,7 +19,7 @@ libraries:
   - splines
 
 model_arguments:
-  stan_model: "base_hiearchical2.stan"
+  stan_model: "base_hiearchical.stan"
   model_formula: "~ neg_log_transit_proportion + StringencyIndex"
   N2: 120
   seed: 4711
@@ -32,12 +32,12 @@ data:
   daily_data: "odv5g_0514"
 
 stan_arguments:
-  iter: 3000
-  warmup: 2000
+  iter: 1500
+  warmup: 1000
   chains: 4
-  thin: 2
+  thin: 1
   control:
-    adapt_delta: 0.95
+    adapt_delta: 0.92
     max_treedepth: 10
 
 EOF
