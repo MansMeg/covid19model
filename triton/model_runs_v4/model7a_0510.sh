@@ -6,7 +6,7 @@ date
 
 git rev-parse --short HEAD
 
-export JOB_ID="model9b_0430"
+export JOB_ID="model7a_0430"
 
 module load r/3.6.1-python3
 
@@ -32,10 +32,10 @@ data:
   daily_data: "odv5g_0514"
 
 stan_arguments:
-  iter: 2000
+  iter: 3000
   warmup: 1000
   chains: 4
-  thin: 2
+  thin: 4
   control:
     adapt_delta: 0.95
     max_treedepth: 12

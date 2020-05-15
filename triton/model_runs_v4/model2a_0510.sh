@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=0-04:00:00
+#SBATCH --time=0-08:00:00
 #SBATCH --cpus-per-task=4
 
 date
@@ -37,7 +37,7 @@ stan_arguments:
   chains: 4
   thin: 2
   control:
-    adapt_delta: 0.95
+    adapt_delta: 0.975
     max_treedepth: 10
 
 EOF
