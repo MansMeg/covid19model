@@ -34,7 +34,7 @@ stan_arguments:
   chains: 4
   thin: 2
   control:
-    adapt_delta: 0.995
+    adapt_delta: 0.999
     max_treedepth: 15
 
 EOF
