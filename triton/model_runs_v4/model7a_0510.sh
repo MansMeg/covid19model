@@ -32,12 +32,12 @@ data:
   daily_data: "odv5g_0514"
 
 stan_arguments:
-  iter: 3000
+  iter: 2000
   warmup: 1000
   chains: 4
   thin: 4
   control:
-    adapt_delta: 0.95
+    adapt_delta: 0.975
     max_treedepth: 12
 
 EOF
