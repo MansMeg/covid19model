@@ -38,7 +38,7 @@ stan_arguments:
   thin: 4
   control:
     adapt_delta: 0.975
-    max_treedepth: 12
+    max_treedepth: 15
 
 EOF
 
